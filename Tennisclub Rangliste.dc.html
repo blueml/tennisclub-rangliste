@@ -1,0 +1,1508 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<meta name="design_doc_mode" content="canvas">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:oklch(0.965 0.006 90);font-family:'Manrope',system-ui,sans-serif}
+a{color:oklch(0.5 0.13 155)}
+a:hover{color:oklch(0.4 0.13 155)}
+.dv-turn{padding:40px 44px 32px;border-bottom:1px solid rgba(0,0,0,.08);scroll-margin-top:16px}
+.dv-thd{display:flex;align-items:baseline;gap:10px;margin:0 0 8px}
+.dv-tid{font:600 10px ui-monospace,Menlo,monospace;padding:3px 7px;background:oklch(0.22 0.02 90);color:#fff;border-radius:4px;text-decoration:none}
+.dv-tname{font:700 14px/1.2 'Manrope',system-ui,sans-serif;color:oklch(0.22 0.02 90)}
+.dv-note{margin:0 0 22px;font:13px/1.5 'Manrope',system-ui,sans-serif;color:oklch(0.48 0.02 90);max-width:760px}
+.dv-opts{display:flex;flex-wrap:wrap;gap:28px;align-items:flex-start}
+.dv-opt{flex:none;display:flex;flex-direction:column;gap:9px;scroll-margin-top:16px}
+.dv-oid{font:700 10.5px ui-monospace,Menlo,monospace;padding:3px 7px;background:rgba(0,0,0,.08);color:oklch(0.22 0.02 90);border-radius:5px;text-decoration:none}
+.dv-olabel{display:flex;align-items:baseline;gap:8px;font:600 12px/1.3 'Manrope',system-ui,sans-serif;color:oklch(0.35 0.02 90)}
+.dv-card{max-width:100%;background:#fff;border:1px solid rgba(0,0,0,.08);border-radius:14px;box-shadow:0 1px 3px rgba(0,0,0,.06);overflow:hidden}
+.dv-opt:target .dv-oid{background:oklch(0.55 0.13 155);color:#fff}
+.dv-next{margin:22px 0 0;font:12px/1.5 'Manrope',system-ui,sans-serif;color:rgba(0,0,0,.5)}
+</style>
+</helmet>
+<section class="dv-turn" id="t3">
+<div class="dv-thd"><a class="dv-tid" href="#t3">3</a><span class="dv-tname">Weiterentwicklung von <a class="dv-oid" href="#2a">2a</a> — Login &amp; Rollen</span></div>
+<p class="dv-note">Zwei Modi: Admin (legt Spieler:innen mit Name, E-Mail und initialem Kennwort an) und Spieler (meldet sich mit E-Mail + Kennwort an). Das initiale Kennwort muss bei der ersten Anmeldung geändert werden — erst danach kann die Person herausfordern. Die Admin-Zugangsdaten sind fest hinterlegt (simuliert eine serverseitige Konfigurationsdatei, nicht über die UI verwaltbar).</p>
+<div class="dv-opts">
+<div class="dv-opt" id="3a">
+<div class="dv-olabel"><a class="dv-oid" href="#3a">3a</a>Pyramiden-Baum mit Login, Rollen &amp; Pflicht-Kennwortwechsel</div>
+<div class="dv-card" style="width:820px;font-family:'Manrope',system-ui,sans-serif;position:relative;overflow:hidden;min-height:560px">
+
+  <sc-if value="{{ dIsLogin }}" hint-placeholder-val="{{ true }}">
+    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:560px;padding:40px;gap:22px">
+      <div style="text-align:center">
+        <div style="font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:oklch(0.55 0.13 155)">TC Waldpark e.V.</div>
+        <div style="font-size:24px;font-weight:800;color:oklch(0.22 0.02 90)">Anmelden</div>
+      </div>
+      <div style="display:flex;background:oklch(0.95 0.006 90);border-radius:10px;padding:4px;gap:4px">
+        <button onClick="{{ dOnSetPlayerTab }}" style="{{ dPlayerTabStyle }}">Spieler</button>
+        <button onClick="{{ dOnSetAdminTab }}" style="{{ dAdminTabStyle }}">Admin</button>
+      </div>
+
+      <sc-if value="{{ dIsPlayerTab }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex;flex-direction:column;gap:12px;width:320px">
+          <input placeholder="E-Mail" value="{{ dLoginEmail }}" onChange="{{ dOnLoginEmailChange }}" style="padding:11px 14px;border:1px solid oklch(0.88 0.01 90);border-radius:9px;font-size:14px;font-family:inherit"/>
+          <input placeholder="Kennwort" type="password" value="{{ dLoginPassword }}" onChange="{{ dOnLoginPasswordChange }}" style="padding:11px 14px;border:1px solid oklch(0.88 0.01 90);border-radius:9px;font-size:14px;font-family:inherit"/>
+          <button onClick="{{ dOnSubmitPlayerLogin }}" style="padding:11px;background:oklch(0.55 0.13 155);color:white;border:none;border-radius:9px;font-weight:700;font-size:14px;cursor:pointer;font-family:inherit">Anmelden</button>
+        </div>
+      </sc-if>
+      <sc-if value="{{ dIsAdminTab }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:12px;width:320px">
+          <input placeholder="Benutzername" value="{{ dLoginUsername }}" onChange="{{ dOnLoginUsernameChange }}" style="padding:11px 14px;border:1px solid oklch(0.88 0.01 90);border-radius:9px;font-size:14px;font-family:inherit"/>
+          <input placeholder="Kennwort" type="password" value="{{ dLoginPassword }}" onChange="{{ dOnLoginPasswordChange }}" style="padding:11px 14px;border:1px solid oklch(0.88 0.01 90);border-radius:9px;font-size:14px;font-family:inherit"/>
+          <button onClick="{{ dOnSubmitAdminLogin }}" style="padding:11px;background:oklch(0.22 0.02 90);color:white;border:none;border-radius:9px;font-weight:700;font-size:14px;cursor:pointer;font-family:inherit">Als Admin anmelden</button>
+        </div>
+      </sc-if>
+
+      <sc-if value="{{ dHasLoginError }}" hint-placeholder-val="{{ false }}">
+        <div style="font-size:13px;color:oklch(0.55 0.16 25);font-weight:600">{{ dLoginError }}</div>
+      </sc-if>
+
+      <div style="margin-top:6px;padding:14px 18px;background:oklch(0.98 0.005 90);border:1px solid oklch(0.9 0.01 90);border-radius:10px;font-size:12px;color:oklch(0.5 0.02 90);line-height:1.6;width:320px">
+        <strong style="color:oklch(0.35 0.02 90)">Demo-Zugangsdaten</strong><br/>
+        Spieler: lena.bauer@tcwaldpark.de · start123<br/>
+        Admin: vorstand · Waldpark#2026
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ dIsChangePassword }}" hint-placeholder-val="{{ false }}">
+    <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:560px;padding:40px;gap:20px">
+      <div style="text-align:center;max-width:360px">
+        <div style="font-size:20px;font-weight:800;color:oklch(0.22 0.02 90)">Kennwort ändern</div>
+        <div style="font-size:13.5px;color:oklch(0.5 0.02 90);margin-top:6px;line-height:1.5">Hallo {{ dSelfName }}, bevor du andere Spieler:innen herausfordern kannst, lege bitte ein neues Kennwort fest.</div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:12px;width:320px">
+        <input placeholder="Neues Kennwort" type="password" value="{{ dPwNew }}" onChange="{{ dOnPwNewChange }}" style="padding:11px 14px;border:1px solid oklch(0.88 0.01 90);border-radius:9px;font-size:14px;font-family:inherit"/>
+        <input placeholder="Kennwort bestätigen" type="password" value="{{ dPwConfirm }}" onChange="{{ dOnPwConfirmChange }}" style="padding:11px 14px;border:1px solid oklch(0.88 0.01 90);border-radius:9px;font-size:14px;font-family:inherit"/>
+        <sc-if value="{{ dHasPwError }}" hint-placeholder-val="{{ false }}">
+          <div style="font-size:12.5px;color:oklch(0.55 0.16 25);font-weight:600">{{ dPwError }}</div>
+        </sc-if>
+        <button onClick="{{ dOnSubmitPasswordChange }}" style="padding:11px;background:oklch(0.55 0.13 155);color:white;border:none;border-radius:9px;font-weight:700;font-size:14px;cursor:pointer;font-family:inherit">Kennwort speichern</button>
+        <button onClick="{{ dOnLogout }}" style="padding:9px;background:none;border:none;color:oklch(0.55 0.02 90);font-size:12.5px;cursor:pointer;font-family:inherit">Abmelden</button>
+      </div>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ dIsApp }}" hint-placeholder-val="{{ false }}">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:20px 28px;border-bottom:1px solid oklch(0.9 0.01 90)">
+      <div style="display:flex;flex-direction:column;gap:2px">
+        <div style="font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:oklch(0.55 0.13 155)">TC Waldpark e.V.</div>
+        <div style="font-size:20px;font-weight:800;color:oklch(0.22 0.02 90)">Rangliste</div>
+      </div>
+      <div style="display:flex;align-items:center;gap:12px">
+        <sc-if value="{{ dIsPlayerRole }}" hint-placeholder-val="{{ true }}">
+          <div style="font-size:13px;color:oklch(0.4 0.02 90)">Angemeldet als <strong>{{ dSelfName }}</strong> (Rang {{ dSelfRank }})</div>
+        </sc-if>
+        <sc-if value="{{ dIsAdminRole }}" hint-placeholder-val="{{ false }}">
+          <div style="font-size:13px;color:oklch(0.4 0.02 90)">Angemeldet als <strong>Admin</strong></div>
+        </sc-if>
+        <button onClick="{{ dOnLogout }}" style="padding:8px 14px;background:none;border:1.5px solid oklch(0.88 0.01 90);border-radius:9px;font-size:12.5px;font-weight:700;color:oklch(0.35 0.02 90);cursor:pointer;font-family:inherit">Abmelden</button>
+      </div>
+    </div>
+
+    <sc-if value="{{ dToast }}" hint-placeholder-val="{{ false }}">
+      <div style="margin:16px 28px 0;padding:10px 16px;background:oklch(0.94 0.05 155);border:1px solid oklch(0.7 0.1 155 / 0.35);border-radius:10px;display:flex;align-items:center;justify-content:space-between;font-size:13px;color:oklch(0.3 0.08 155)">
+        <span>{{ dToast }}</span>
+        <button onClick="{{ dOnDismissToast }}" style="background:none;border:none;cursor:pointer;font-size:15px;color:oklch(0.4 0.06 155)">×</button>
+      </div>
+    </sc-if>
+
+    <div style="margin:16px 28px 0;padding:14px 18px;background:oklch(0.98 0.005 90);border:1px solid oklch(0.9 0.01 90);border-radius:12px">
+      <div style="font-size:12px;font-weight:700;color:oklch(0.22 0.02 90);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:10px">Offene Matches</div>
+      <sc-if value="{{ dHasOpenMatches }}" hint-placeholder-val="{{ false }}">
+        <div style="display:flex;flex-direction:column;gap:6px">
+          <sc-for list="{{ dOpenMatches }}" as="m" hint-placeholder-count="2">
+            <button onClick="{{ m.onOpen }}" style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:white;border:1px solid oklch(0.9 0.01 90);border-radius:9px;cursor:pointer;font-family:inherit;text-align:left">
+              <span style="width:10px;height:10px;border-radius:50%;background:{{ m.color }};flex-shrink:0"></span>
+              <span style="font-size:13px;color:oklch(0.25 0.02 90)"><strong>#{{ m.challengerRank }} {{ m.challengerName }}</strong> vs. <strong>#{{ m.defenderRank }} {{ m.defenderName }}</strong></span>
+            </button>
+          </sc-for>
+        </div>
+      </sc-if>
+      <sc-if value="{{ dNoOpenMatches }}" hint-placeholder-val="{{ true }}">
+        <div style="font-size:12.5px;color:oklch(0.55 0.02 90)">Keine offenen Matches.</div>
+      </sc-if>
+    </div>
+
+    <sc-if value="{{ dIsAdminRole }}" hint-placeholder-val="{{ false }}">
+      <div style="margin:16px 28px 0;padding:16px 20px;background:oklch(0.98 0.005 90);border:1px solid oklch(0.9 0.01 90);border-radius:12px">
+        <div style="font-size:13px;font-weight:700;color:oklch(0.22 0.02 90);margin-bottom:10px">Spielerverwaltung · {{ dCount }} Mitglieder</div>
+        <div style="display:flex;flex-direction:column;gap:6px;max-height:200px;overflow-y:auto;margin-bottom:14px">
+          <sc-for list="{{ dAdminPlayers }}" as="p" hint-placeholder-count="5">
+            <div style="display:flex;align-items:center;gap:10px;padding:6px 10px;background:white;border:1px solid oklch(0.92 0.01 90);border-radius:8px;font-size:12.5px">
+              <span style="font-variant-numeric:tabular-nums;color:oklch(0.48 0.02 90);width:24px;font-weight:700">#{{ p.rank }}</span>
+              <span style="flex:1;min-width:0">
+                <div style="color:oklch(0.22 0.02 90);font-weight:600">{{ p.name }}</div>
+                <div style="color:oklch(0.55 0.02 90);font-size:11px">{{ p.email }}</div>
+              </span>
+              <sc-if value="{{ p.mustChange }}" hint-placeholder-val="{{ false }}">
+                <span style="font-size:10.5px;font-weight:700;color:oklch(0.6 0.13 70);white-space:nowrap">muss Kennwort ändern</span>
+              </sc-if>
+              <sc-if value="{{ p.unlocked }}" hint-placeholder-val="{{ true }}">
+                <button onClick="{{ p.onRemove }}" style="background:none;border:none;color:oklch(0.55 0.16 25);cursor:pointer;font-size:12px;font-weight:700;font-family:inherit">Entfernen</button>
+              </sc-if>
+            </div>
+          </sc-for>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <input placeholder="Name" value="{{ dNewPlayerName }}" onChange="{{ dOnNewPlayerNameChange }}" style="padding:9px 12px;border:1px solid oklch(0.88 0.01 90);border-radius:8px;font-size:13px;font-family:inherit"/>
+          <input placeholder="E-Mail" value="{{ dNewPlayerEmail }}" onChange="{{ dOnNewPlayerEmailChange }}" style="padding:9px 12px;border:1px solid oklch(0.88 0.01 90);border-radius:8px;font-size:13px;font-family:inherit"/>
+          <div style="display:flex;gap:8px">
+            <input placeholder="Initiales Kennwort" value="{{ dNewPlayerPassword }}" onChange="{{ dOnNewPlayerPasswordChange }}" style="flex:1;padding:9px 12px;border:1px solid oklch(0.88 0.01 90);border-radius:8px;font-size:13px;font-family:inherit"/>
+            <button onClick="{{ dOnGeneratePassword }}" style="padding:9px 14px;background:none;border:1.5px solid oklch(0.88 0.01 90);border-radius:8px;font-size:12.5px;font-weight:700;color:oklch(0.35 0.02 90);cursor:pointer;font-family:inherit">Generieren</button>
+          </div>
+          <div style="display:flex;gap:8px">
+            <button onClick="{{ dOnAddPlayer }}" style="flex:1;padding:9px 16px;background:oklch(0.55 0.13 155);color:white;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">Spieler:in anlegen</button>
+            <button onClick="{{ dOnReset }}" style="padding:9px 16px;background:none;color:oklch(0.48 0.02 90);border:1px solid oklch(0.88 0.01 90);border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">Zurücksetzen</button>
+          </div>
+        </div>
+      </div>
+    </sc-if>
+
+    <div style="padding:28px 28px 40px;display:flex;flex-direction:column;align-items:center;gap:16px">
+      <sc-for list="{{ dRows }}" as="row" hint-placeholder-count="5">
+        <div style="display:flex;flex-direction:column;align-items:center;gap:8px">
+          <div style="font-size:10.5px;font-weight:700;letter-spacing:0.09em;text-transform:uppercase;color:oklch(0.62 0.02 90)">{{ row.label }}</div>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center">
+            <sc-for list="{{ row.players }}" as="pl" hint-placeholder-count="3">
+              <button onClick="{{ pl.onClick }}" style="{{ pl.cardStyle }}">
+                <span style="font-size:11px;font-weight:800;font-variant-numeric:tabular-nums;color:oklch(0.55 0.02 90)">#{{ pl.rank }}</span>
+                <span style="font-size:13.5px;font-weight:700;color:oklch(0.22 0.02 90)">{{ pl.name }}</span>
+              </button>
+            </sc-for>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+
+    <sc-if value="{{ dSelected }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute;top:0;right:0;bottom:0;width:260px;background:white;border-left:1px solid oklch(0.9 0.01 90);padding:24px 20px;display:flex;flex-direction:column;gap:14px;box-shadow:-8px 0 24px rgba(0,0,0,0.06);overflow-y:auto">
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:oklch(0.55 0.13 155)">Ausgewählt</div>
+          <button onClick="{{ dSelected.onClose }}" style="background:none;border:none;cursor:pointer;font-size:16px;color:oklch(0.6 0.02 90)">×</button>
+        </div>
+        <div>
+          <div style="font-size:18px;font-weight:800;color:oklch(0.22 0.02 90)">{{ dSelected.name }}</div>
+          <div style="font-size:13px;color:oklch(0.48 0.02 90)">Rang {{ dSelected.rank }}</div>
+        </div>
+        <div style="font-size:11.5px;font-weight:700;color:oklch(0.48 0.02 90);text-transform:uppercase;letter-spacing:0.06em">Herausfordern</div>
+        <sc-if value="{{ dSelected.hasTargets }}" hint-placeholder-val="{{ true }}">
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <sc-for list="{{ dSelected.targetList }}" as="t" hint-placeholder-count="2">
+              <button onClick="{{ t.onChallenge }}" style="text-align:left;padding:10px 12px;border:1.5px dashed oklch(0.78 0.16 115 / 0.6);background:oklch(0.97 0.03 115);border-radius:10px;cursor:pointer;display:flex;flex-direction:column;gap:2px;font-family:inherit">
+                <span style="font-size:13px;font-weight:700;color:oklch(0.22 0.02 90)">#{{ t.rank }} {{ t.name }}</span>
+                <span style="font-size:11px;color:oklch(0.45 0.07 115)">{{ t.type }}</span>
+              </button>
+            </sc-for>
+          </div>
+        </sc-if>
+        <sc-if value="{{ dSelected.noTargets }}" hint-placeholder-val="{{ false }}">
+          <div style="font-size:12.5px;color:oklch(0.55 0.02 90);line-height:1.5">Keine gültigen freien Ziele — Ziel entweder gesperrt oder bereits höchstmögliche Position.</div>
+        </sc-if>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ dModal }}" hint-placeholder-val="{{ false }}">
+      <div style="position:absolute;inset:0;background:rgba(20,30,20,0.45);display:flex;align-items:center;justify-content:center;z-index:10">
+        <div style="width:340px;background:white;border-radius:16px;padding:26px;display:flex;flex-direction:column;gap:16px;box-shadow:0 20px 60px rgba(0,0,0,0.25)">
+          <sc-if value="{{ dModal.isConfirm }}" hint-placeholder-val="{{ true }}">
+            <div style="font-size:16px;font-weight:800;color:oklch(0.22 0.02 90)">Neue Herausforderung</div>
+            <div style="font-size:13.5px;color:oklch(0.35 0.02 90);line-height:1.55">
+              <strong>{{ dModal.challengerName }}</strong> (Rang {{ dModal.challengerRank }}) fordert <strong>{{ dModal.defenderName }}</strong> (Rang {{ dModal.defenderRank }}) heraus. Beide werden gesperrt, bis das Match beendet ist.
+            </div>
+            <div style="display:flex;gap:10px;justify-content:flex-end">
+              <button onClick="{{ dModal.onClose }}" style="padding:10px 16px;border:1.5px solid oklch(0.88 0.01 90);background:none;border-radius:9px;font-weight:700;cursor:pointer;font-family:inherit">Abbrechen</button>
+              <button onClick="{{ dModal.onConfirm }}" style="padding:10px 16px;background:oklch(0.55 0.13 155);color:white;border:none;border-radius:9px;font-weight:700;cursor:pointer;font-family:inherit">Match eröffnen</button>
+            </div>
+          </sc-if>
+          <sc-if value="{{ dModal.isAction }}" hint-placeholder-val="{{ false }}">
+            <div style="display:flex;align-items:center;gap:8px">
+              <span style="width:10px;height:10px;border-radius:50%;background:{{ dModal.color }}"></span>
+              <div style="font-size:16px;font-weight:800;color:oklch(0.22 0.02 90)">Offenes Match</div>
+            </div>
+            <div style="font-size:13.5px;color:oklch(0.35 0.02 90)">{{ dModal.challengerName }} (#{{ dModal.challengerRank }}) vs. {{ dModal.defenderName }} (#{{ dModal.defenderRank }})</div>
+
+            <sc-if value="{{ dModal.hasMismatch }}" hint-placeholder-val="{{ false }}">
+              <div style="padding:10px 12px;background:oklch(0.96 0.05 40);border:1px solid oklch(0.65 0.13 40 / 0.4);border-radius:9px;font-size:12.5px;color:oklch(0.4 0.1 40);font-weight:600">Widerspruch: beide Meldungen stimmen nicht überein. Ein Admin muss entscheiden.</div>
+            </sc-if>
+
+            <sc-if value="{{ dModal.isParticipant }}" hint-placeholder-val="{{ true }}">
+              <div style="font-size:13px;color:oklch(0.35 0.02 90)">Wer hat gewonnen?</div>
+              <div style="display:flex;flex-direction:column;gap:8px">
+                <button onClick="{{ dModal.onConfirmSelfWin }}" style="padding:12px;border:1.5px solid oklch(0.78 0.16 115 / 0.6);background:oklch(0.97 0.03 115);border-radius:10px;font-weight:700;text-align:left;cursor:pointer;font-family:inherit">Ich habe gewonnen</button>
+                <button onClick="{{ dModal.onConfirmOtherWin }}" style="padding:12px;border:1.5px solid oklch(0.9 0.01 90);background:none;border-radius:10px;font-weight:700;text-align:left;cursor:pointer;font-family:inherit">{{ dModal.otherName }} hat gewonnen</button>
+              </div>
+              <sc-if value="{{ dModal.waitingForOther }}" hint-placeholder-val="{{ false }}">
+                <div style="font-size:12.5px;color:oklch(0.55 0.02 90)">Bestätigung gespeichert — wartet auf {{ dModal.otherName }}.</div>
+              </sc-if>
+              <sc-if value="{{ dModal.otherPendingYou }}" hint-placeholder-val="{{ false }}">
+                <div style="font-size:12.5px;color:oklch(0.55 0.02 90)">{{ dModal.otherName }} hat bereits ein Ergebnis gemeldet — bitte bestätige es oben.</div>
+              </sc-if>
+            </sc-if>
+
+            <sc-if value="{{ dModal.isAdminViewer }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;flex-direction:column;gap:4px;font-size:12.5px;color:oklch(0.45 0.02 90);padding:10px 12px;background:oklch(0.98 0.005 90);border-radius:9px">
+                <div>{{ dModal.challengerName }}: {{ dModal.challengerReportText }}</div>
+                <div>{{ dModal.defenderName }}: {{ dModal.defenderReportText }}</div>
+              </div>
+              <div style="font-size:11.5px;font-weight:700;color:oklch(0.48 0.02 90);text-transform:uppercase;letter-spacing:0.05em">Admin-Entscheidung</div>
+              <div style="display:flex;flex-direction:column;gap:8px">
+                <button onClick="{{ dModal.onAdminWinChallenger }}" style="padding:12px;border:1.5px solid oklch(0.78 0.16 115 / 0.6);background:oklch(0.97 0.03 115);border-radius:10px;font-weight:700;text-align:left;cursor:pointer;font-family:inherit">{{ dModal.challengerName }} gewinnt (setzen)</button>
+                <button onClick="{{ dModal.onAdminWinDefender }}" style="padding:12px;border:1.5px solid oklch(0.9 0.01 90);background:none;border-radius:10px;font-weight:700;text-align:left;cursor:pointer;font-family:inherit">{{ dModal.defenderName }} gewinnt (setzen)</button>
+              </div>
+              <button onClick="{{ dModal.onAdminCancel }}" style="padding:10px;border:none;background:none;color:oklch(0.55 0.16 25);font-weight:700;font-size:12.5px;cursor:pointer;font-family:inherit">Match abbrechen</button>
+            </sc-if>
+
+            <sc-if value="{{ dModal.isReadOnly }}" hint-placeholder-val="{{ false }}">
+              <div style="display:flex;flex-direction:column;gap:4px;font-size:12.5px;color:oklch(0.45 0.02 90);padding:10px 12px;background:oklch(0.98 0.005 90);border-radius:9px">
+                <div>{{ dModal.challengerName }}: {{ dModal.challengerReportText }}</div>
+                <div>{{ dModal.defenderName }}: {{ dModal.defenderReportText }}</div>
+              </div>
+            </sc-if>
+
+            <button onClick="{{ dModal.onClose }}" style="padding:8px;border:none;background:none;color:oklch(0.55 0.02 90);font-weight:600;font-size:12px;cursor:pointer;font-family:inherit">Schließen</button>
+          </sc-if>
+        </div>
+      </div>
+    </sc-if>
+  </sc-if>
+</div>
+</div>
+</div>
+<p class="dv-next">Nächste Schritte: "Passwort-Reset per Admin ergänzen" · "E-Mail-Format validieren" · "gleiche Auth-Logik auch in <a class="dv-oid" href="#1b">1b</a>"</p>
+</section>
+<section class="dv-turn" id="t2">
+<div class="dv-thd"><a class="dv-tid" href="#t2">2</a><span class="dv-tname">Weiterentwicklung von <a class="dv-oid" href="#1a">1a</a> — offene Matches</span></div>
+<p class="dv-note">Eine Herausforderung erzeugt jetzt ein "offenes Match" statt einer sofortigen Ergebniseingabe. Beide beteiligten Spieler:innen sind gesperrt (gleiche Randfarbe im Baum) und können erst wieder herausfordern oder herausgefordert werden, wenn ihr Match beendet oder abgebrochen wurde. Das Ergebnis wird eingetragen, indem eine der beiden Spieler:innen ausgewählt und der Ausgang bestimmt wird.</p>
+<div class="dv-opts">
+<div class="dv-opt" id="2a">
+<div class="dv-olabel"><a class="dv-oid" href="#2a">2a</a>Pyramiden-Baum mit offener Match-Liste</div>
+<div class="dv-card" style="width:900px;font-family:'Manrope',system-ui,sans-serif;position:relative;overflow:hidden">
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:20px 28px;border-bottom:1px solid oklch(0.9 0.01 90)">
+    <div style="display:flex;flex-direction:column;gap:2px">
+      <div style="font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:oklch(0.55 0.13 155)">TC Waldpark e.V.</div>
+      <div style="font-size:20px;font-weight:800;color:oklch(0.22 0.02 90)">Rangliste</div>
+    </div>
+    <button onClick="{{ cOnToggleAdmin }}" style="padding:9px 16px;background:none;border:1.5px solid oklch(0.88 0.01 90);border-radius:9px;font-size:13px;font-weight:700;color:oklch(0.35 0.02 90);cursor:pointer;font-family:inherit">Verwaltung</button>
+  </div>
+
+  <sc-if value="{{ cToast }}" hint-placeholder-val="{{ false }}">
+    <div style="margin:16px 28px 0;padding:10px 16px;background:oklch(0.94 0.05 155);border:1px solid oklch(0.7 0.1 155 / 0.35);border-radius:10px;display:flex;align-items:center;justify-content:space-between;font-size:13px;color:oklch(0.3 0.08 155)">
+      <span>{{ cToast }}</span>
+      <button onClick="{{ cOnDismissToast }}" style="background:none;border:none;cursor:pointer;font-size:15px;color:oklch(0.4 0.06 155)">×</button>
+    </div>
+  </sc-if>
+
+  <div style="margin:16px 28px 0;padding:14px 18px;background:oklch(0.98 0.005 90);border:1px solid oklch(0.9 0.01 90);border-radius:12px">
+    <div style="font-size:12px;font-weight:700;color:oklch(0.22 0.02 90);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:10px">Offene Matches</div>
+    <sc-if value="{{ cHasOpenMatches }}" hint-placeholder-val="{{ false }}">
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <sc-for list="{{ cOpenMatches }}" as="m" hint-placeholder-count="2">
+          <button onClick="{{ m.onOpen }}" style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:white;border:1px solid oklch(0.9 0.01 90);border-radius:9px;cursor:pointer;font-family:inherit;text-align:left">
+            <span style="width:10px;height:10px;border-radius:50%;background:{{ m.color }};flex-shrink:0"></span>
+            <span style="font-size:13px;color:oklch(0.25 0.02 90)"><strong>#{{ m.challengerRank }} {{ m.challengerName }}</strong> vs. <strong>#{{ m.defenderRank }} {{ m.defenderName }}</strong></span>
+          </button>
+        </sc-for>
+      </div>
+    </sc-if>
+    <sc-if value="{{ cNoOpenMatches }}" hint-placeholder-val="{{ true }}">
+      <div style="font-size:12.5px;color:oklch(0.55 0.02 90)">Keine offenen Matches — wähle eine Spieler:in im Baum, um eine Herausforderung zu starten.</div>
+    </sc-if>
+  </div>
+
+  <sc-if value="{{ cAdminOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="margin:16px 28px 0;padding:16px 20px;background:oklch(0.98 0.005 90);border:1px solid oklch(0.9 0.01 90);border-radius:12px">
+      <div style="font-size:13px;font-weight:700;color:oklch(0.22 0.02 90);margin-bottom:10px">Spielerverwaltung · {{ cCount }} Mitglieder</div>
+      <div style="display:flex;flex-direction:column;gap:6px;max-height:220px;overflow-y:auto;margin-bottom:12px">
+        <sc-for list="{{ cAdminPlayers }}" as="p" hint-placeholder-count="5">
+          <div style="display:flex;align-items:center;gap:10px;padding:6px 10px;background:white;border:1px solid oklch(0.92 0.01 90);border-radius:8px;font-size:13px">
+            <span style="font-variant-numeric:tabular-nums;color:oklch(0.48 0.02 90);width:26px;font-weight:700">#{{ p.rank }}</span>
+            <span style="flex:1;color:oklch(0.22 0.02 90)">{{ p.name }}</span>
+            <sc-if value="{{ p.locked }}" hint-placeholder-val="{{ false }}">
+              <span style="font-size:11px;font-weight:700;color:oklch(0.55 0.02 90)">im Match</span>
+            </sc-if>
+            <sc-if value="{{ p.unlocked }}" hint-placeholder-val="{{ true }}">
+              <button onClick="{{ p.onRemove }}" style="background:none;border:none;color:oklch(0.55 0.16 25);cursor:pointer;font-size:12px;font-weight:700;font-family:inherit">Entfernen</button>
+            </sc-if>
+          </div>
+        </sc-for>
+      </div>
+      <div style="display:flex;gap:8px">
+        <input placeholder="Name neuer Spieler:in" value="{{ cNewName }}" onChange="{{ cOnNewNameChange }}" onKeyDown="{{ cOnNewNameKey }}" style="flex:1;padding:9px 12px;border:1px solid oklch(0.88 0.01 90);border-radius:8px;font-size:13px;font-family:inherit"/>
+        <button onClick="{{ cOnAddPlayer }}" style="padding:9px 16px;background:oklch(0.55 0.13 155);color:white;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">Hinzufügen</button>
+        <button onClick="{{ cOnReset }}" style="padding:9px 16px;background:none;color:oklch(0.48 0.02 90);border:1px solid oklch(0.88 0.01 90);border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">Zurücksetzen</button>
+      </div>
+    </div>
+  </sc-if>
+
+  <div style="padding:28px 28px 40px;display:flex;flex-direction:column;align-items:center;gap:16px">
+    <sc-for list="{{ cRows }}" as="row" hint-placeholder-count="5">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:8px">
+        <div style="font-size:10.5px;font-weight:700;letter-spacing:0.09em;text-transform:uppercase;color:oklch(0.62 0.02 90)">{{ row.label }}</div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center">
+          <sc-for list="{{ row.players }}" as="pl" hint-placeholder-count="3">
+            <button onClick="{{ pl.onClick }}" style="{{ pl.cardStyle }}">
+              <span style="font-size:11px;font-weight:800;font-variant-numeric:tabular-nums;color:oklch(0.55 0.02 90)">#{{ pl.rank }}</span>
+              <span style="font-size:13.5px;font-weight:700;color:oklch(0.22 0.02 90)">{{ pl.name }}</span>
+            </button>
+          </sc-for>
+        </div>
+      </div>
+    </sc-for>
+  </div>
+
+  <sc-if value="{{ cSelected }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;top:0;right:0;bottom:0;width:260px;background:white;border-left:1px solid oklch(0.9 0.01 90);padding:24px 20px;display:flex;flex-direction:column;gap:14px;box-shadow:-8px 0 24px rgba(0,0,0,0.06);overflow-y:auto">
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:oklch(0.55 0.13 155)">Ausgewählt</div>
+        <button onClick="{{ cSelected.onClose }}" style="background:none;border:none;cursor:pointer;font-size:16px;color:oklch(0.6 0.02 90)">×</button>
+      </div>
+      <div>
+        <div style="font-size:18px;font-weight:800;color:oklch(0.22 0.02 90)">{{ cSelected.name }}</div>
+        <div style="font-size:13px;color:oklch(0.48 0.02 90)">Rang {{ cSelected.rank }}</div>
+      </div>
+      <div style="font-size:11.5px;font-weight:700;color:oklch(0.48 0.02 90);text-transform:uppercase;letter-spacing:0.06em">Herausfordern</div>
+      <sc-if value="{{ cSelected.hasTargets }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <sc-for list="{{ cSelected.targetList }}" as="t" hint-placeholder-count="2">
+            <button onClick="{{ t.onChallenge }}" style="text-align:left;padding:10px 12px;border:1.5px dashed oklch(0.78 0.16 115 / 0.6);background:oklch(0.97 0.03 115);border-radius:10px;cursor:pointer;display:flex;flex-direction:column;gap:2px;font-family:inherit">
+              <span style="font-size:13px;font-weight:700;color:oklch(0.22 0.02 90)">#{{ t.rank }} {{ t.name }}</span>
+              <span style="font-size:11px;color:oklch(0.45 0.07 115)">{{ t.type }}</span>
+            </button>
+          </sc-for>
+        </div>
+      </sc-if>
+      <sc-if value="{{ cSelected.noTargets }}" hint-placeholder-val="{{ false }}">
+        <div style="font-size:12.5px;color:oklch(0.55 0.02 90);line-height:1.5">Keine gültigen freien Ziele — Ziel entweder gesperrt oder bereits höchstmögliche Position.</div>
+      </sc-if>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ cModal }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;inset:0;background:rgba(20,30,20,0.45);display:flex;align-items:center;justify-content:center;z-index:10">
+      <div style="width:340px;background:white;border-radius:16px;padding:26px;display:flex;flex-direction:column;gap:16px;box-shadow:0 20px 60px rgba(0,0,0,0.25)">
+        <sc-if value="{{ cModal.isConfirm }}" hint-placeholder-val="{{ true }}">
+          <div style="font-size:16px;font-weight:800;color:oklch(0.22 0.02 90)">Neue Herausforderung</div>
+          <div style="font-size:13.5px;color:oklch(0.35 0.02 90);line-height:1.55">
+            <strong>{{ cModal.challengerName }}</strong> (Rang {{ cModal.challengerRank }}) fordert <strong>{{ cModal.defenderName }}</strong> (Rang {{ cModal.defenderRank }}) heraus. Beide werden gesperrt, bis das Match beendet ist.
+          </div>
+          <div style="display:flex;gap:10px;justify-content:flex-end">
+            <button onClick="{{ cModal.onClose }}" style="padding:10px 16px;border:1.5px solid oklch(0.88 0.01 90);background:none;border-radius:9px;font-weight:700;cursor:pointer;font-family:inherit">Abbrechen</button>
+            <button onClick="{{ cModal.onConfirm }}" style="padding:10px 16px;background:oklch(0.55 0.13 155);color:white;border:none;border-radius:9px;font-weight:700;cursor:pointer;font-family:inherit">Match eröffnen</button>
+          </div>
+        </sc-if>
+        <sc-if value="{{ cModal.isAction }}" hint-placeholder-val="{{ false }}">
+          <div style="display:flex;align-items:center;gap:8px">
+            <span style="width:10px;height:10px;border-radius:50%;background:{{ cModal.color }}"></span>
+            <div style="font-size:16px;font-weight:800;color:oklch(0.22 0.02 90)">Offenes Match</div>
+          </div>
+          <div style="font-size:13.5px;color:oklch(0.35 0.02 90)">{{ cModal.challengerName }} (#{{ cModal.challengerRank }}) vs. {{ cModal.defenderName }} (#{{ cModal.defenderRank }}) — wer hat gewonnen?</div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <button onClick="{{ cModal.onWinChallenger }}" style="padding:12px;border:1.5px solid oklch(0.78 0.16 115 / 0.6);background:oklch(0.97 0.03 115);border-radius:10px;font-weight:700;text-align:left;cursor:pointer;font-family:inherit">{{ cModal.challengerName }} gewinnt</button>
+            <button onClick="{{ cModal.onWinDefender }}" style="padding:12px;border:1.5px solid oklch(0.9 0.01 90);background:none;border-radius:10px;font-weight:700;text-align:left;cursor:pointer;font-family:inherit">{{ cModal.defenderName }} gewinnt</button>
+          </div>
+          <button onClick="{{ cModal.onCancelMatch }}" style="padding:10px;border:none;background:none;color:oklch(0.55 0.16 25);font-weight:700;font-size:12.5px;cursor:pointer;font-family:inherit">Match abbrechen</button>
+          <button onClick="{{ cModal.onClose }}" style="padding:8px;border:none;background:none;color:oklch(0.55 0.02 90);font-weight:600;font-size:12px;cursor:pointer;font-family:inherit">Schließen (später entscheiden)</button>
+        </sc-if>
+      </div>
+    </div>
+  </sc-if>
+</div>
+</div>
+</div>
+<p class="dv-next">Nächste Schritte: "Farblegende für offene Matches ergänzen" · "Verlauf abgeschlossener Matches anzeigen" · "gleiche Logik auch für <a class="dv-oid" href="#1b">1b</a> übernehmen"</p>
+</section>
+<section class="dv-turn" id="t1">
+<div class="dv-thd"><a class="dv-tid" href="#t1">1</a><span class="dv-tname">Tennisclub Rangliste — zwei Richtungen</span></div>
+<p class="dv-note">Annahme zur Regel: "links in der gleichen Reihe" = alle Plätze links der eigenen Position; "eine Reihe höher rechts" = alle Plätze in der Reihe darüber, deren Spalte auf oder rechts der eigenen Spalte liegt. Ganz rechts stehende Spieler:innen haben deshalb kein Ziel in der Reihe darüber — nur seitliche Herausforderungen. Beide Prototypen simulieren Herausfordern, Ergebnis eintragen (Ränge tauschen bei Sieg) und Verwaltung (Spieler hinzufügen/entfernen/zurücksetzen).</p>
+<div class="dv-opts">
+
+<div class="dv-opt" id="1a">
+<div class="dv-olabel"><a class="dv-oid" href="#1a">1a</a>Pyramiden-Baum — räumliche Bracket-Ansicht</div>
+<div class="dv-card" style="width:860px;font-family:'Manrope',system-ui,sans-serif;position:relative;overflow:hidden">
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:20px 28px;border-bottom:1px solid oklch(0.9 0.01 90)">
+    <div style="display:flex;flex-direction:column;gap:2px">
+      <div style="font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:oklch(0.55 0.13 155)">TC Waldpark e.V.</div>
+      <div style="font-size:20px;font-weight:800;color:oklch(0.22 0.02 90)">Rangliste</div>
+    </div>
+    <button onClick="{{ aOnToggleAdmin }}" style="padding:9px 16px;background:none;border:1.5px solid oklch(0.88 0.01 90);border-radius:9px;font-size:13px;font-weight:700;color:oklch(0.35 0.02 90);cursor:pointer;font-family:inherit">Verwaltung</button>
+  </div>
+
+  <sc-if value="{{ aToast }}" hint-placeholder-val="{{ false }}">
+    <div style="margin:16px 28px 0;padding:10px 16px;background:oklch(0.94 0.05 155);border:1px solid oklch(0.7 0.1 155 / 0.35);border-radius:10px;display:flex;align-items:center;justify-content:space-between;font-size:13px;color:oklch(0.3 0.08 155)">
+      <span>{{ aToast }}</span>
+      <button onClick="{{ aOnDismissToast }}" style="background:none;border:none;cursor:pointer;font-size:15px;color:oklch(0.4 0.06 155)">×</button>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ aAdminOpen }}" hint-placeholder-val="{{ false }}">
+    <div style="margin:16px 28px 0;padding:16px 20px;background:oklch(0.98 0.005 90);border:1px solid oklch(0.9 0.01 90);border-radius:12px">
+      <div style="font-size:13px;font-weight:700;color:oklch(0.22 0.02 90);margin-bottom:10px">Spielerverwaltung · {{ aCount }} Mitglieder</div>
+      <div style="display:flex;flex-direction:column;gap:6px;max-height:220px;overflow-y:auto;margin-bottom:12px">
+        <sc-for list="{{ aAdminPlayers }}" as="p" hint-placeholder-count="5">
+          <div style="display:flex;align-items:center;gap:10px;padding:6px 10px;background:white;border:1px solid oklch(0.92 0.01 90);border-radius:8px;font-size:13px">
+            <span style="font-variant-numeric:tabular-nums;color:oklch(0.48 0.02 90);width:26px;font-weight:700">#{{ p.rank }}</span>
+            <span style="flex:1;color:oklch(0.22 0.02 90)">{{ p.name }}</span>
+            <button onClick="{{ p.onRemove }}" style="background:none;border:none;color:oklch(0.55 0.16 25);cursor:pointer;font-size:12px;font-weight:700;font-family:inherit">Entfernen</button>
+          </div>
+        </sc-for>
+      </div>
+      <div style="display:flex;gap:8px">
+        <input placeholder="Name neuer Spieler:in" value="{{ aNewName }}" onChange="{{ aOnNewNameChange }}" onKeyDown="{{ aOnNewNameKey }}" style="flex:1;padding:9px 12px;border:1px solid oklch(0.88 0.01 90);border-radius:8px;font-size:13px;font-family:inherit"/>
+        <button onClick="{{ aOnAddPlayer }}" style="padding:9px 16px;background:oklch(0.55 0.13 155);color:white;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">Hinzufügen</button>
+        <button onClick="{{ aOnReset }}" style="padding:9px 16px;background:none;color:oklch(0.48 0.02 90);border:1px solid oklch(0.88 0.01 90);border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">Zurücksetzen</button>
+      </div>
+    </div>
+  </sc-if>
+
+  <div style="padding:32px 28px 40px;display:flex;flex-direction:column;align-items:center;gap:16px">
+    <sc-for list="{{ aRows }}" as="row" hint-placeholder-count="5">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:8px">
+        <div style="font-size:10.5px;font-weight:700;letter-spacing:0.09em;text-transform:uppercase;color:oklch(0.62 0.02 90)">{{ row.label }}</div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:center">
+          <sc-for list="{{ row.players }}" as="pl" hint-placeholder-count="3">
+            <button onClick="{{ pl.onClick }}" style="{{ pl.cardStyle }}">
+              <span style="font-size:11px;font-weight:800;font-variant-numeric:tabular-nums;color:oklch(0.55 0.02 90)">#{{ pl.rank }}</span>
+              <span style="font-size:13.5px;font-weight:700;color:oklch(0.22 0.02 90)">{{ pl.name }}</span>
+            </button>
+          </sc-for>
+        </div>
+      </div>
+    </sc-for>
+  </div>
+
+  <sc-if value="{{ aSelected }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;top:0;right:0;bottom:0;width:260px;background:white;border-left:1px solid oklch(0.9 0.01 90);padding:24px 20px;display:flex;flex-direction:column;gap:14px;box-shadow:-8px 0 24px rgba(0,0,0,0.06);overflow-y:auto">
+      <div style="display:flex;align-items:center;justify-content:space-between">
+        <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:oklch(0.55 0.13 155)">Ausgewählt</div>
+        <button onClick="{{ aSelected.onClose }}" style="background:none;border:none;cursor:pointer;font-size:16px;color:oklch(0.6 0.02 90)">×</button>
+      </div>
+      <div>
+        <div style="font-size:18px;font-weight:800;color:oklch(0.22 0.02 90)">{{ aSelected.name }}</div>
+        <div style="font-size:13px;color:oklch(0.48 0.02 90)">Rang {{ aSelected.rank }}</div>
+      </div>
+      <div style="font-size:11.5px;font-weight:700;color:oklch(0.48 0.02 90);text-transform:uppercase;letter-spacing:0.06em">Herausfordern</div>
+      <sc-if value="{{ aSelected.hasTargets }}" hint-placeholder-val="{{ true }}">
+        <div style="display:flex;flex-direction:column;gap:8px">
+          <sc-for list="{{ aSelected.targetList }}" as="t" hint-placeholder-count="2">
+            <button onClick="{{ t.onChallenge }}" style="text-align:left;padding:10px 12px;border:1.5px dashed oklch(0.78 0.16 115 / 0.6);background:oklch(0.97 0.03 115);border-radius:10px;cursor:pointer;display:flex;flex-direction:column;gap:2px;font-family:inherit">
+              <span style="font-size:13px;font-weight:700;color:oklch(0.22 0.02 90)">#{{ t.rank }} {{ t.name }}</span>
+              <span style="font-size:11px;color:oklch(0.45 0.07 115)">{{ t.type }}</span>
+            </button>
+          </sc-for>
+        </div>
+      </sc-if>
+      <sc-if value="{{ aSelected.noTargets }}" hint-placeholder-val="{{ false }}">
+        <div style="font-size:12.5px;color:oklch(0.55 0.02 90);line-height:1.5">Keine gültigen Ziele — bereits an höchstmöglicher Position für diese Spalte.</div>
+      </sc-if>
+    </div>
+  </sc-if>
+
+  <sc-if value="{{ aModal }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;inset:0;background:rgba(20,30,20,0.45);display:flex;align-items:center;justify-content:center;z-index:10">
+      <div style="width:340px;background:white;border-radius:16px;padding:26px;display:flex;flex-direction:column;gap:16px;box-shadow:0 20px 60px rgba(0,0,0,0.25)">
+        <div style="font-size:16px;font-weight:800;color:oklch(0.22 0.02 90)">Herausforderung</div>
+        <sc-if value="{{ aModal.isConfirm }}" hint-placeholder-val="{{ true }}">
+          <div style="font-size:13.5px;color:oklch(0.35 0.02 90);line-height:1.55">
+            <strong>{{ aModal.challengerName }}</strong> (Rang {{ aModal.challengerRank }}) fordert <strong>{{ aModal.defenderName }}</strong> (Rang {{ aModal.defenderRank }}) heraus.
+          </div>
+          <div style="display:flex;gap:10px;justify-content:flex-end">
+            <button onClick="{{ aModal.onClose }}" style="padding:10px 16px;border:1.5px solid oklch(0.88 0.01 90);background:none;border-radius:9px;font-weight:700;cursor:pointer;font-family:inherit">Abbrechen</button>
+            <button onClick="{{ aModal.onConfirm }}" style="padding:10px 16px;background:oklch(0.55 0.13 155);color:white;border:none;border-radius:9px;font-weight:700;cursor:pointer;font-family:inherit">Match bestätigen</button>
+          </div>
+        </sc-if>
+        <sc-if value="{{ aModal.isResult }}" hint-placeholder-val="{{ false }}">
+          <div style="font-size:13.5px;color:oklch(0.35 0.02 90)">Wer hat gewonnen?</div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <button onClick="{{ aModal.onWinChallenger }}" style="padding:12px;border:1.5px solid oklch(0.78 0.16 115 / 0.6);background:oklch(0.97 0.03 115);border-radius:10px;font-weight:700;text-align:left;cursor:pointer;font-family:inherit">{{ aModal.challengerName }} gewinnt</button>
+            <button onClick="{{ aModal.onWinDefender }}" style="padding:12px;border:1.5px solid oklch(0.9 0.01 90);background:none;border-radius:10px;font-weight:700;text-align:left;cursor:pointer;font-family:inherit">{{ aModal.defenderName }} verteidigt</button>
+          </div>
+        </sc-if>
+      </div>
+    </div>
+  </sc-if>
+</div>
+</div>
+
+<div class="dv-opt" id="1b">
+<div class="dv-olabel"><a class="dv-oid" href="#1b">1b</a>Ranglisten-Dashboard — kompakte Lane-Ansicht mit Sidebar</div>
+<div class="dv-card" style="width:1040px;font-family:'Manrope',system-ui,sans-serif;display:flex;position:relative;overflow:hidden">
+  <div style="flex:1;display:flex;flex-direction:column;min-width:0">
+    <div style="padding:20px 24px;border-bottom:1px solid oklch(0.9 0.01 90);display:flex;align-items:center;justify-content:space-between">
+      <div>
+        <div style="font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;color:oklch(0.55 0.15 115)">TC Waldpark e.V.</div>
+        <div style="font-size:20px;font-weight:800;color:oklch(0.22 0.02 90)">Rangliste — Dashboard</div>
+      </div>
+      <div style="font-size:12px;color:oklch(0.5 0.02 90);font-weight:600">{{ bCount }} Spieler:innen</div>
+    </div>
+
+    <sc-if value="{{ bToast }}" hint-placeholder-val="{{ false }}">
+      <div style="margin:14px 24px 0;padding:10px 16px;background:oklch(0.95 0.06 115);border:1px solid oklch(0.7 0.12 115 / 0.4);border-radius:10px;display:flex;align-items:center;justify-content:space-between;font-size:13px;color:oklch(0.35 0.09 115)">
+        <span>{{ bToast }}</span>
+        <button onClick="{{ bOnDismissToast }}" style="background:none;border:none;cursor:pointer;font-size:15px;color:oklch(0.42 0.08 115)">×</button>
+      </div>
+    </sc-if>
+
+    <div style="padding:18px 24px 24px;display:flex;flex-direction:column;gap:10px;overflow-y:auto;max-height:560px">
+      <sc-for list="{{ bRows }}" as="row" hint-placeholder-count="5">
+        <div style="display:flex;align-items:center;gap:14px;padding:10px 14px;background:oklch(0.98 0.004 90);border-radius:12px;border:1px solid oklch(0.93 0.01 90)">
+          <div style="width:64px;flex-shrink:0;font-size:10.5px;font-weight:800;color:oklch(0.5 0.02 90);text-transform:uppercase;letter-spacing:0.04em">{{ row.label }}</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <sc-for list="{{ row.players }}" as="pl" hint-placeholder-count="3">
+              <button onClick="{{ pl.onClick }}" style="{{ pl.chipStyle }}">
+                <span style="font-size:11px;font-weight:800;font-variant-numeric:tabular-nums;color:oklch(0.48 0.02 90)">{{ pl.rank }}</span>
+                <span style="font-size:13px;font-weight:600;color:oklch(0.22 0.02 90)">{{ pl.name }}</span>
+              </button>
+            </sc-for>
+          </div>
+        </div>
+      </sc-for>
+    </div>
+  </div>
+
+  <div style="width:320px;flex-shrink:0;border-left:1px solid oklch(0.9 0.01 90);display:flex;flex-direction:column">
+    <div style="display:flex;border-bottom:1px solid oklch(0.9 0.01 90)">
+      <button onClick="{{ bOnSetTabChallenge }}" style="{{ bTabChallengeStyle }}">Fordern</button>
+      <button onClick="{{ bOnSetTabAdmin }}" style="{{ bTabAdminStyle }}">Verwaltung</button>
+    </div>
+
+    <sc-if value="{{ bIsChallengeTab }}" hint-placeholder-val="{{ true }}">
+      <div style="padding:20px;display:flex;flex-direction:column;gap:14px;overflow-y:auto">
+        <sc-if value="{{ bSelected }}" hint-placeholder-val="{{ false }}">
+          <div>
+            <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:oklch(0.55 0.15 115);margin-bottom:4px">Ausgewählt</div>
+            <div style="font-size:17px;font-weight:800;color:oklch(0.22 0.02 90)">{{ bSelected.name }}</div>
+            <div style="font-size:12.5px;color:oklch(0.48 0.02 90)">Rang {{ bSelected.rank }}</div>
+          </div>
+          <div style="font-size:11.5px;font-weight:700;color:oklch(0.48 0.02 90);text-transform:uppercase;letter-spacing:0.06em">Herausfordern</div>
+          <sc-if value="{{ bSelected.hasTargets }}" hint-placeholder-val="{{ true }}">
+            <div style="display:flex;flex-direction:column;gap:0">
+              <sc-for list="{{ bSelected.targetList }}" as="t" hint-placeholder-count="2">
+                <button onClick="{{ t.onChallenge }}" style="text-align:left;padding:10px 4px;border:none;border-bottom:1px solid oklch(0.93 0.01 90);background:none;cursor:pointer;display:flex;flex-direction:column;gap:2px;font-family:inherit">
+                  <span style="font-size:13px;font-weight:700;color:oklch(0.22 0.02 90)">#{{ t.rank }} {{ t.name }}</span>
+                  <span style="font-size:11px;color:oklch(0.5 0.09 115)">{{ t.type }}</span>
+                </button>
+              </sc-for>
+            </div>
+          </sc-if>
+          <sc-if value="{{ bSelected.noTargets }}" hint-placeholder-val="{{ false }}">
+            <div style="font-size:12.5px;color:oklch(0.55 0.02 90);line-height:1.5">Keine gültigen Ziele — bereits an höchstmöglicher Position für diese Spalte.</div>
+          </sc-if>
+          <button onClick="{{ bSelected.onClose }}" style="margin-top:4px;padding:9px;border:1.5px solid oklch(0.88 0.01 90);background:none;border-radius:8px;font-size:12.5px;font-weight:600;color:oklch(0.4 0.02 90);cursor:pointer;font-family:inherit">Auswahl aufheben</button>
+        </sc-if>
+        <sc-if value="{{ bNoSelection }}" hint-placeholder-val="{{ true }}">
+          <div style="font-size:13px;color:oklch(0.55 0.02 90);line-height:1.6">Wähle links eine Spieler:in aus, um verfügbare Herausforderungen zu sehen.</div>
+        </sc-if>
+      </div>
+    </sc-if>
+
+    <sc-if value="{{ bIsAdminTab }}" hint-placeholder-val="{{ false }}">
+      <div style="padding:20px;display:flex;flex-direction:column;gap:12px;overflow-y:auto">
+        <div style="font-size:12px;font-weight:700;color:oklch(0.22 0.02 90)">{{ bCount }} Mitglieder</div>
+        <div style="display:flex;flex-direction:column;gap:6px;max-height:280px;overflow-y:auto">
+          <sc-for list="{{ bAdminPlayers }}" as="p" hint-placeholder-count="5">
+            <div style="display:flex;align-items:center;gap:10px;padding:6px 8px;background:oklch(0.98 0.004 90);border:1px solid oklch(0.93 0.01 90);border-radius:8px;font-size:13px">
+              <span style="font-variant-numeric:tabular-nums;color:oklch(0.48 0.02 90);width:24px;font-weight:700">#{{ p.rank }}</span>
+              <span style="flex:1;color:oklch(0.22 0.02 90)">{{ p.name }}</span>
+              <button onClick="{{ p.onRemove }}" style="background:none;border:none;color:oklch(0.55 0.16 25);cursor:pointer;font-size:11.5px;font-weight:700;font-family:inherit">Entfernen</button>
+            </div>
+          </sc-for>
+        </div>
+        <input placeholder="Name neuer Spieler:in" value="{{ bNewName }}" onChange="{{ bOnNewNameChange }}" onKeyDown="{{ bOnNewNameKey }}" style="padding:9px 12px;border:1px solid oklch(0.88 0.01 90);border-radius:8px;font-size:13px;font-family:inherit"/>
+        <button onClick="{{ bOnAddPlayer }}" style="padding:9px 16px;background:oklch(0.55 0.15 115);color:oklch(0.2 0.05 115);border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit">Hinzufügen</button>
+        <button onClick="{{ bOnReset }}" style="padding:9px 16px;background:none;color:oklch(0.48 0.02 90);border:1px solid oklch(0.88 0.01 90);border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit">Zurücksetzen</button>
+      </div>
+    </sc-if>
+  </div>
+
+  <sc-if value="{{ bModal }}" hint-placeholder-val="{{ false }}">
+    <div style="position:absolute;inset:0;background:rgba(20,30,20,0.45);display:flex;align-items:center;justify-content:center;z-index:10">
+      <div style="width:340px;background:white;border-radius:16px;padding:26px;display:flex;flex-direction:column;gap:16px;box-shadow:0 20px 60px rgba(0,0,0,0.25)">
+        <div style="font-size:16px;font-weight:800;color:oklch(0.22 0.02 90)">Herausforderung</div>
+        <sc-if value="{{ bModal.isConfirm }}" hint-placeholder-val="{{ true }}">
+          <div style="font-size:13.5px;color:oklch(0.35 0.02 90);line-height:1.55">
+            <strong>{{ bModal.challengerName }}</strong> (Rang {{ bModal.challengerRank }}) fordert <strong>{{ bModal.defenderName }}</strong> (Rang {{ bModal.defenderRank }}) heraus.
+          </div>
+          <div style="display:flex;gap:10px;justify-content:flex-end">
+            <button onClick="{{ bModal.onClose }}" style="padding:10px 16px;border:1.5px solid oklch(0.88 0.01 90);background:none;border-radius:9px;font-weight:700;cursor:pointer;font-family:inherit">Abbrechen</button>
+            <button onClick="{{ bModal.onConfirm }}" style="padding:10px 16px;background:oklch(0.55 0.15 115);color:oklch(0.2 0.05 115);border:none;border-radius:9px;font-weight:700;cursor:pointer;font-family:inherit">Match bestätigen</button>
+          </div>
+        </sc-if>
+        <sc-if value="{{ bModal.isResult }}" hint-placeholder-val="{{ false }}">
+          <div style="font-size:13.5px;color:oklch(0.35 0.02 90)">Wer hat gewonnen?</div>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <button onClick="{{ bModal.onWinChallenger }}" style="padding:12px;border:1.5px solid oklch(0.7 0.13 115 / 0.6);background:oklch(0.97 0.05 115);border-radius:10px;font-weight:700;text-align:left;cursor:pointer;font-family:inherit">{{ bModal.challengerName }} gewinnt</button>
+            <button onClick="{{ bModal.onWinDefender }}" style="padding:12px;border:1.5px solid oklch(0.9 0.01 90);background:none;border-radius:10px;font-weight:700;text-align:left;cursor:pointer;font-family:inherit">{{ bModal.defenderName }} verteidigt</button>
+          </div>
+        </sc-if>
+      </div>
+    </div>
+  </sc-if>
+</div>
+</div>
+
+</div>
+<p class="dv-next">Nächste Schritte: "mobile Ansicht von <a class="dv-oid" href="#1b">1b</a>" · "Verbindungslinien in <a class="dv-oid" href="#1a">1a</a> zwischen Karten" · "dritte Variante mit Turnierbaum-Stil"</p>
+</section>
+
+</x-dc>
+<script type="text/x-dc" data-dc-script>
+class Component extends DCLogic {
+  NAMES = ["Lena Bauer","Jonas Richter","Mia Schulz","Finn Wagner","Sophie Klein","Paul Hoffmann","Emma Becker","Leon Schmidt","Anna Wolf","Ben Krüger","Lea Zimmermann","Max Fischer","Nina Vogel","Tom Weber","Lara Hartmann"];
+
+  freshSlice() {
+    return { players: [...this.NAMES], selectedIndex: null, modal: null, adminOpen: false, toast: null, newName: '' };
+  }
+
+  state = {
+    a: this.freshSlice(),
+    b: { ...this.freshSlice(), activeTab: 'challenge' },
+    c: { players: [...this.NAMES], selectedIndex: null, openMatches: [], colorCounter: 0, activeModal: null, adminOpen: false, toast: null, newName: '' },
+    d: {
+      session: null, loginTab: 'player', loginEmail: '', loginPassword: '', loginUsername: '', loginError: null,
+      pwNew: '', pwConfirm: '', pwError: null,
+      players: this.seedPlayersD(), selectedIndex: null, openMatches: [], colorCounter: 0, activeModal: null,
+      newPlayerName: '', newPlayerEmail: '', newPlayerPassword: '', toast: null,
+    },
+  };
+
+  MATCH_COLORS = ['oklch(0.62 0.14 25)', 'oklch(0.62 0.13 75)', 'oklch(0.58 0.13 145)', 'oklch(0.6 0.12 220)', 'oklch(0.58 0.13 280)', 'oklch(0.62 0.14 335)'];
+  ADMIN_ACCOUNTS = [{ username: 'vorstand', password: 'Waldpark#2026' }];
+
+  slugifyName(name) {
+    return name.toLowerCase()
+      .replace(/ä/g, 'ae').replace(/ö/g, 'oe').replace(/ü/g, 'ue').replace(/ß/g, 'ss')
+      .replace(/\s+/g, '.');
+  }
+
+  seedPlayersD() {
+    return this.NAMES.map(name => ({ name, email: this.slugifyName(name) + '@tcwaldpark.de', password: 'start123', mustChangePassword: true }));
+  }
+
+  triangular(r) { return r * (r + 1) / 2; }
+
+  // Challenger takes the defender's slot; defender and everyone ranked between
+  // the two (exclusive of the challenger) each drop exactly one position.
+  applyChallengeWin(players, challengerIdx, defenderIdx) {
+    const arr = players.slice();
+    const challenger = arr[challengerIdx];
+    arr.splice(challengerIdx, 1);
+    arr.splice(defenderIdx, 0, challenger);
+    return arr;
+  }
+
+  coordsForIndex(i) {
+    let r = Math.floor((Math.sqrt(8 * i + 1) - 1) / 2);
+    while (this.triangular(r + 1) <= i) r++;
+    while (this.triangular(r) > i) r--;
+    return { row: r, col: i - this.triangular(r) };
+  }
+
+  getTargets(n, i) {
+    const { row: r, col: c } = this.coordsForIndex(i);
+    const rowStart = this.triangular(r);
+    const leftIdx = [];
+    for (let j = rowStart; j < i; j++) leftIdx.push(j);
+    const aboveIdx = [];
+    if (r > 0) {
+      const prevStart = this.triangular(r - 1);
+      const prevEnd = rowStart - 1;
+      const from = prevStart + c;
+      for (let j = Math.max(from, prevStart); j <= Math.min(prevEnd, n - 1); j++) aboveIdx.push(j);
+    }
+    return { leftIdx, aboveIdx };
+  }
+
+  selectPlayer(key, idx) {
+    this.setState(s => {
+      const slice = s[key];
+      const nextIdx = slice.selectedIndex === idx ? null : idx;
+      return { [key]: { ...slice, selectedIndex: nextIdx, modal: null } };
+    });
+  }
+
+  pickTarget(key, idx) {
+    this.setState(s => {
+      const slice = s[key];
+      return { [key]: { ...slice, modal: { challengerIdx: slice.selectedIndex, defenderIdx: idx, step: 'confirm' } } };
+    });
+  }
+
+  closeModal(key) {
+    this.setState(s => ({ [key]: { ...s[key], modal: null } }));
+  }
+
+  confirmChallenge(key) {
+    this.setState(s => ({ [key]: { ...s[key], modal: { ...s[key].modal, step: 'result' } } }));
+  }
+
+  pickWinner(key, winnerIdx) {
+    this.setState(s => {
+      const slice = s[key];
+      const { challengerIdx, defenderIdx } = slice.modal;
+      let players = slice.players;
+      const challengerName = players[challengerIdx];
+      const defenderName = players[defenderIdx];
+      let toast;
+      if (winnerIdx === challengerIdx) {
+        players = this.applyChallengeWin(players, challengerIdx, defenderIdx);
+        toast = challengerName + ' gewinnt und übernimmt Rang ' + (defenderIdx + 1) + '.';
+      } else {
+        toast = defenderName + ' verteidigt die Position gegen ' + challengerName + '.';
+      }
+      return { [key]: { ...slice, players, modal: null, selectedIndex: null, toast } };
+    });
+  }
+
+  dismissToast(key) {
+    this.setState(s => ({ [key]: { ...s[key], toast: null } }));
+  }
+
+  toggleAdmin(key) {
+    this.setState(s => ({ [key]: { ...s[key], adminOpen: !s[key].adminOpen } }));
+  }
+
+  setTab(key, tab) {
+    this.setState(s => ({ [key]: { ...s[key], activeTab: tab } }));
+  }
+
+  setNewName(key, val) {
+    this.setState(s => ({ [key]: { ...s[key], newName: val } }));
+  }
+
+  addPlayer(key) {
+    this.setState(s => {
+      const slice = s[key];
+      const name = slice.newName.trim();
+      if (!name) return null;
+      return { [key]: { ...slice, players: [...slice.players, name], newName: '', toast: name + ' wurde auf Rang ' + (slice.players.length + 1) + ' aufgenommen.' } };
+    });
+  }
+
+  handleNameKey(key, e) {
+    if (e.key === 'Enter') this.addPlayer(key);
+  }
+
+  removePlayer(key, idx) {
+    this.setState(s => {
+      const slice = s[key];
+      const name = slice.players[idx];
+      const players = slice.players.filter((_, i) => i !== idx);
+      let selectedIndex = slice.selectedIndex;
+      if (selectedIndex === idx) selectedIndex = null;
+      else if (selectedIndex != null && selectedIndex > idx) selectedIndex = selectedIndex - 1;
+      return { [key]: { ...slice, players, selectedIndex, toast: name + ' wurde entfernt.' } };
+    });
+  }
+
+  resetLadder(key) {
+    this.setState(s => ({ [key]: { ...this.freshSlice(), activeTab: s[key].activeTab } }));
+  }
+
+  cardStyleFor(isSelected, isTarget) {
+    const base = "padding:10px 16px;border-radius:14px;cursor:pointer;font-family:inherit;display:flex;flex-direction:column;align-items:center;gap:2px;min-width:112px;transition:all .15s;";
+    if (isSelected) return base + "background:oklch(0.96 0.03 155);border:1.5px solid oklch(0.55 0.13 155);box-shadow:0 0 0 3px oklch(0.55 0.13 155 / 0.15);";
+    if (isTarget) return base + "background:oklch(0.98 0.03 115);border:1.5px dashed oklch(0.78 0.16 115);";
+    return base + "background:white;border:1.5px solid oklch(0.9 0.01 90);";
+  }
+
+  chipStyleFor(isSelected, isTarget) {
+    const base = "padding:7px 12px;border-radius:20px;cursor:pointer;font-family:inherit;display:flex;align-items:center;gap:6px;";
+    if (isSelected) return base + "background:oklch(0.91 0.06 155);border:1.5px solid oklch(0.55 0.13 155);";
+    if (isTarget) return base + "background:oklch(0.97 0.06 115);border:1.5px dashed oklch(0.7 0.13 115);";
+    return base + "background:oklch(0.94 0.006 90);border:1.5px solid transparent;";
+  }
+
+  findMatchForPlayer(matches, idx) {
+    return matches.find(m => m.challengerIdx === idx || m.defenderIdx === idx);
+  }
+
+  selectPlayerC(idx) {
+    this.setState(s => {
+      const slice = s.c;
+      const existing = this.findMatchForPlayer(slice.openMatches, idx);
+      if (existing) return { c: { ...slice, activeModal: { type: 'action', matchId: existing.id } } };
+      const nextIdx = slice.selectedIndex === idx ? null : idx;
+      return { c: { ...slice, selectedIndex: nextIdx } };
+    });
+  }
+
+  pickTargetC(idx) {
+    this.setState(s => ({ c: { ...s.c, activeModal: { type: 'confirm', challengerIdx: s.c.selectedIndex, defenderIdx: idx } } }));
+  }
+
+  closeModalC() {
+    this.setState(s => ({ c: { ...s.c, activeModal: null } }));
+  }
+
+  confirmNewMatchC() {
+    this.setState(s => {
+      const slice = s.c;
+      const { challengerIdx, defenderIdx } = slice.activeModal;
+      const color = this.MATCH_COLORS[slice.colorCounter % this.MATCH_COLORS.length];
+      const match = { id: 'm' + slice.colorCounter, challengerIdx, defenderIdx, color };
+      return { c: { ...slice, openMatches: [...slice.openMatches, match], colorCounter: slice.colorCounter + 1, selectedIndex: null, activeModal: null, toast: 'Neues offenes Match: ' + slice.players[challengerIdx] + ' vs. ' + slice.players[defenderIdx] + '.' } };
+    });
+  }
+
+  openMatchFromList(matchId) {
+    this.setState(s => ({ c: { ...s.c, activeModal: { type: 'action', matchId } } }));
+  }
+
+  finishMatchC(winnerIdx) {
+    this.setState(s => {
+      const slice = s.c;
+      const matchId = slice.activeModal.matchId;
+      const match = slice.openMatches.find(m => m.id === matchId);
+      const challengerName = slice.players[match.challengerIdx];
+      const defenderName = slice.players[match.defenderIdx];
+      let players = slice.players;
+      let toast;
+      let remaining = slice.openMatches.filter(m => m.id !== matchId);
+      if (winnerIdx === match.challengerIdx) {
+        players = this.applyChallengeWin(players, match.challengerIdx, match.defenderIdx);
+        toast = challengerName + ' gewinnt und übernimmt Rang ' + (match.defenderIdx + 1) + '.';
+        const cIdx = match.challengerIdx, dIdx = match.defenderIdx;
+        const mapIdx = (i) => (i === cIdx ? dIdx : (i >= dIdx && i < cIdx ? i + 1 : i));
+        remaining = remaining.map(m => ({ ...m, challengerIdx: mapIdx(m.challengerIdx), defenderIdx: mapIdx(m.defenderIdx) }));
+      } else {
+        toast = defenderName + ' verteidigt die Position gegen ' + challengerName + '.';
+      }
+      return { c: { ...slice, players, openMatches: remaining, activeModal: null, toast } };
+    });
+  }
+
+  cancelMatchC() {
+    this.setState(s => {
+      const slice = s.c;
+      const matchId = slice.activeModal.matchId;
+      const match = slice.openMatches.find(m => m.id === matchId);
+      const openMatches = slice.openMatches.filter(m => m.id !== matchId);
+      return { c: { ...slice, openMatches, activeModal: null, toast: 'Match zwischen ' + slice.players[match.challengerIdx] + ' und ' + slice.players[match.defenderIdx] + ' wurde abgebrochen.' } };
+    });
+  }
+
+  dismissToastC() {
+    this.setState(s => ({ c: { ...s.c, toast: null } }));
+  }
+
+  toggleAdminC() {
+    this.setState(s => ({ c: { ...s.c, adminOpen: !s.c.adminOpen } }));
+  }
+
+  setNewNameC(val) {
+    this.setState(s => ({ c: { ...s.c, newName: val } }));
+  }
+
+  handleNameKeyC(e) {
+    if (e.key === 'Enter') this.addPlayerC();
+  }
+
+  addPlayerC() {
+    this.setState(s => {
+      const slice = s.c;
+      const name = slice.newName.trim();
+      if (!name) return null;
+      return { c: { ...slice, players: [...slice.players, name], newName: '', toast: name + ' wurde auf Rang ' + (slice.players.length + 1) + ' aufgenommen.' } };
+    });
+  }
+
+  removePlayerC(idx) {
+    this.setState(s => {
+      const slice = s.c;
+      if (this.findMatchForPlayer(slice.openMatches, idx)) {
+        return { c: { ...slice, toast: 'Kann nicht entfernt werden — Spieler:in hat ein offenes Match.' } };
+      }
+      const name = slice.players[idx];
+      const players = slice.players.filter((_, i) => i !== idx);
+      const openMatches = slice.openMatches.map(m => ({
+        ...m,
+        challengerIdx: m.challengerIdx > idx ? m.challengerIdx - 1 : m.challengerIdx,
+        defenderIdx: m.defenderIdx > idx ? m.defenderIdx - 1 : m.defenderIdx,
+      }));
+      let selectedIndex = slice.selectedIndex;
+      if (selectedIndex === idx) selectedIndex = null;
+      else if (selectedIndex != null && selectedIndex > idx) selectedIndex -= 1;
+      return { c: { ...slice, players, openMatches, selectedIndex, toast: name + ' wurde entfernt.' } };
+    });
+  }
+
+  resetLadderC() {
+    this.setState(s => ({ c: { players: [...this.NAMES], selectedIndex: null, openMatches: [], colorCounter: 0, activeModal: null, adminOpen: s.c.adminOpen, toast: null, newName: '' } }));
+  }
+
+  cardStyleForC(isSelected, isTarget, lockColor) {
+    const base = "padding:10px 16px;border-radius:14px;cursor:pointer;font-family:inherit;display:flex;flex-direction:column;align-items:center;gap:2px;min-width:112px;transition:all .15s;";
+    if (lockColor) return base + "background:color-mix(in oklch, " + lockColor + " 16%, white);border:1.5px solid " + lockColor + ";box-shadow:0 0 0 2px color-mix(in oklch, " + lockColor + " 25%, transparent);";
+    if (isSelected) return base + "background:oklch(0.96 0.03 155);border:1.5px solid oklch(0.55 0.13 155);box-shadow:0 0 0 3px oklch(0.55 0.13 155 / 0.15);";
+    if (isTarget) return base + "background:oklch(0.98 0.03 115);border:1.5px dashed oklch(0.78 0.16 115);";
+    return base + "background:white;border:1.5px solid oklch(0.9 0.01 90);";
+  }
+
+  buildViewC() {
+    const s = this.state.c;
+    const n = s.players.length;
+    const lockMap = new Map();
+    s.openMatches.forEach(m => { lockMap.set(m.challengerIdx, m.color); lockMap.set(m.defenderIdx, m.color); });
+    const targets = (s.selectedIndex != null && !lockMap.has(s.selectedIndex)) ? this.getTargets(n, s.selectedIndex) : { leftIdx: [], aboveIdx: [] };
+    const targetSet = new Set([...targets.leftIdx, ...targets.aboveIdx].filter(j => !lockMap.has(j)));
+
+    const rowCount = this.coordsForIndex(n - 1).row + 1;
+    const rows = [];
+    for (let r = 0; r < rowCount; r++) {
+      const start = this.triangular(r);
+      const end = Math.min(this.triangular(r + 1), n);
+      const players = [];
+      for (let i = start; i < end; i++) {
+        const isSelected = s.selectedIndex === i;
+        const isTarget = targetSet.has(i);
+        const lockColor = lockMap.get(i) || null;
+        const onClick = lockColor
+          ? () => this.selectPlayerC(i)
+          : (isTarget && !isSelected ? () => this.pickTargetC(i) : () => this.selectPlayerC(i));
+        players.push({ idx: i, name: s.players[i], rank: i + 1, cardStyle: this.cardStyleForC(isSelected, isTarget, lockColor), onClick });
+      }
+      rows.push({ r, label: 'Runde ' + (r + 1), players });
+    }
+
+    let selected = null;
+    if (s.selectedIndex != null && !lockMap.has(s.selectedIndex)) {
+      const idx = s.selectedIndex;
+      const list = [];
+      targets.leftIdx.filter(j => !lockMap.has(j)).forEach(j => list.push({ idx: j, name: s.players[j], rank: j + 1, type: 'Gleiche Reihe · links', onChallenge: () => this.pickTargetC(j) }));
+      targets.aboveIdx.filter(j => !lockMap.has(j)).forEach(j => list.push({ idx: j, name: s.players[j], rank: j + 1, type: 'Reihe höher · rechts', onChallenge: () => this.pickTargetC(j) }));
+      selected = { idx, name: s.players[idx], rank: idx + 1, hasTargets: list.length > 0, noTargets: list.length === 0, targetList: list, onClose: () => this.selectPlayerC(idx) };
+    }
+
+    let modal = null;
+    if (s.activeModal) {
+      if (s.activeModal.type === 'confirm') {
+        const { challengerIdx, defenderIdx } = s.activeModal;
+        modal = {
+          isConfirm: true, isAction: false,
+          challengerName: s.players[challengerIdx], challengerRank: challengerIdx + 1,
+          defenderName: s.players[defenderIdx], defenderRank: defenderIdx + 1,
+          onClose: () => this.closeModalC(),
+          onConfirm: () => this.confirmNewMatchC(),
+        };
+      } else {
+        const match = s.openMatches.find(m => m.id === s.activeModal.matchId);
+        modal = {
+          isConfirm: false, isAction: true, color: match.color,
+          challengerName: s.players[match.challengerIdx], challengerRank: match.challengerIdx + 1,
+          defenderName: s.players[match.defenderIdx], defenderRank: match.defenderIdx + 1,
+          onClose: () => this.closeModalC(),
+          onWinChallenger: () => this.finishMatchC(match.challengerIdx),
+          onWinDefender: () => this.finishMatchC(match.defenderIdx),
+          onCancelMatch: () => this.cancelMatchC(),
+        };
+      }
+    }
+
+    const openMatchesView = s.openMatches.map(m => ({
+      id: m.id, color: m.color,
+      challengerName: s.players[m.challengerIdx], challengerRank: m.challengerIdx + 1,
+      defenderName: s.players[m.defenderIdx], defenderRank: m.defenderIdx + 1,
+      onOpen: () => this.openMatchFromList(m.id),
+    }));
+
+    const adminPlayers = s.players.map((name, idx) => ({ idx, name, rank: idx + 1, locked: lockMap.has(idx), unlocked: !lockMap.has(idx), onRemove: () => this.removePlayerC(idx) }));
+
+    return {
+      rows, selected, modal,
+      openMatches: openMatchesView, hasOpenMatches: openMatchesView.length > 0, noOpenMatches: openMatchesView.length === 0,
+      adminOpen: s.adminOpen, onToggleAdmin: () => this.toggleAdminC(), adminPlayers,
+      newName: s.newName, onNewNameChange: (e) => this.setNewNameC(e.target.value), onNewNameKey: (e) => this.handleNameKeyC(e),
+      onAddPlayer: () => this.addPlayerC(), onReset: () => this.resetLadderC(),
+      toast: s.toast, onDismissToast: () => this.dismissToastC(), count: n,
+    };
+  }
+
+  tabPillStyle(active) {
+    const base = "padding:9px 20px;border:none;border-radius:7px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;";
+    return active ? base + "background:white;color:oklch(0.22 0.02 90);box-shadow:0 1px 2px rgba(0,0,0,0.08);" : base + "background:none;color:oklch(0.55 0.02 90);";
+  }
+
+  setLoginTab(tab) { this.setState(s => ({ d: { ...s.d, loginTab: tab, loginError: null } })); }
+  setLoginEmail(v) { this.setState(s => ({ d: { ...s.d, loginEmail: v } })); }
+  setLoginPassword(v) { this.setState(s => ({ d: { ...s.d, loginPassword: v } })); }
+  setLoginUsername(v) { this.setState(s => ({ d: { ...s.d, loginUsername: v } })); }
+
+  submitPlayerLoginD() {
+    this.setState(s => {
+      const d = s.d;
+      const idx = d.players.findIndex(p => p.email.toLowerCase() === d.loginEmail.trim().toLowerCase());
+      if (idx === -1 || d.players[idx].password !== d.loginPassword) {
+        return { d: { ...d, loginError: 'E-Mail oder Kennwort ist falsch.' } };
+      }
+      return { d: { ...d, session: { role: 'player', idx }, loginError: null, loginEmail: '', loginPassword: '', pwNew: '', pwConfirm: '', pwError: null } };
+    });
+  }
+
+  submitAdminLoginD() {
+    this.setState(s => {
+      const d = s.d;
+      const match = this.ADMIN_ACCOUNTS.find(a => a.username === d.loginUsername.trim() && a.password === d.loginPassword);
+      if (!match) return { d: { ...d, loginError: 'Benutzername oder Kennwort ist falsch.' } };
+      return { d: { ...d, session: { role: 'admin' }, loginError: null, loginUsername: '', loginPassword: '' } };
+    });
+  }
+
+  logoutD() {
+    this.setState(s => ({ d: { ...s.d, session: null, selectedIndex: null, activeModal: null, loginEmail: '', loginPassword: '', loginUsername: '', loginError: null } }));
+  }
+
+  setPwNew(v) { this.setState(s => ({ d: { ...s.d, pwNew: v, pwError: null } })); }
+  setPwConfirm(v) { this.setState(s => ({ d: { ...s.d, pwConfirm: v, pwError: null } })); }
+
+  submitPasswordChangeD() {
+    this.setState(s => {
+      const d = s.d;
+      if (d.pwNew.length < 6) return { d: { ...d, pwError: 'Mindestens 6 Zeichen.' } };
+      if (d.pwNew !== d.pwConfirm) return { d: { ...d, pwError: 'Kennwörter stimmen nicht überein.' } };
+      const idx = d.session.idx;
+      const players = d.players.slice();
+      players[idx] = { ...players[idx], password: d.pwNew, mustChangePassword: false };
+      return { d: { ...d, players, pwNew: '', pwConfirm: '', pwError: null, toast: 'Kennwort erfolgreich geändert.' } };
+    });
+  }
+
+  generatePasswordD() {
+    const chars = 'ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789';
+    let out = '';
+    for (let i = 0; i < 8; i++) out += chars[Math.floor(Math.random() * chars.length)];
+    this.setState(s => ({ d: { ...s.d, newPlayerPassword: out } }));
+  }
+
+  setNewPlayerName(v) { this.setState(s => ({ d: { ...s.d, newPlayerName: v } })); }
+  setNewPlayerEmail(v) { this.setState(s => ({ d: { ...s.d, newPlayerEmail: v } })); }
+  setNewPlayerPassword(v) { this.setState(s => ({ d: { ...s.d, newPlayerPassword: v } })); }
+
+  addPlayerD() {
+    this.setState(s => {
+      const d = s.d;
+      const name = d.newPlayerName.trim();
+      const email = d.newPlayerEmail.trim();
+      const pw = d.newPlayerPassword.trim();
+      if (!name || !email || !pw) return { d: { ...d, toast: 'Bitte Name, E-Mail und initiales Kennwort ausfüllen.' } };
+      const player = { name, email, password: pw, mustChangePassword: true };
+      return { d: { ...d, players: [...d.players, player], newPlayerName: '', newPlayerEmail: '', newPlayerPassword: '', toast: name + ' wurde angelegt (muss Kennwort bei erster Anmeldung ändern).' } };
+    });
+  }
+
+  removePlayerD(idx) {
+    this.setState(s => {
+      const d = s.d;
+      if (this.findMatchForPlayer(d.openMatches, idx)) return { d: { ...d, toast: 'Kann nicht entfernt werden — Spieler:in hat ein offenes Match.' } };
+      const name = d.players[idx].name;
+      const players = d.players.filter((_, i) => i !== idx);
+      const openMatches = d.openMatches.map(m => ({ ...m, challengerIdx: m.challengerIdx > idx ? m.challengerIdx - 1 : m.challengerIdx, defenderIdx: m.defenderIdx > idx ? m.defenderIdx - 1 : m.defenderIdx }));
+      let session = d.session;
+      if (session && session.role === 'player' && session.idx > idx) session = { ...session, idx: session.idx - 1 };
+      let selectedIndex = d.selectedIndex;
+      if (selectedIndex != null && selectedIndex > idx) selectedIndex -= 1;
+      return { d: { ...d, players, openMatches, session, selectedIndex, toast: name + ' wurde entfernt.' } };
+    });
+  }
+
+  resetLadderD() {
+    this.setState(s => ({ d: { ...s.d, players: this.seedPlayersD(), openMatches: [], colorCounter: 0, selectedIndex: null, activeModal: null, toast: null } }));
+  }
+
+  dismissToastD() { this.setState(s => ({ d: { ...s.d, toast: null } })); }
+
+  selectPlayerD(idx) {
+    this.setState(s => {
+      const d = s.d;
+      const existing = this.findMatchForPlayer(d.openMatches, idx);
+      if (existing) return { d: { ...d, activeModal: { type: 'action', matchId: existing.id } } };
+      if (d.session.role !== 'player' || idx !== d.session.idx) return null;
+      const nextIdx = d.selectedIndex === idx ? null : idx;
+      return { d: { ...d, selectedIndex: nextIdx } };
+    });
+  }
+
+  pickTargetD(idx) {
+    this.setState(s => ({ d: { ...s.d, activeModal: { type: 'confirm', challengerIdx: s.d.selectedIndex, defenderIdx: idx } } }));
+  }
+
+  closeModalD() { this.setState(s => ({ d: { ...s.d, activeModal: null } })); }
+
+  confirmNewMatchD() {
+    this.setState(s => {
+      const d = s.d;
+      const { challengerIdx, defenderIdx } = d.activeModal;
+      const color = this.MATCH_COLORS[d.colorCounter % this.MATCH_COLORS.length];
+      const match = { id: 'dm' + d.colorCounter, challengerIdx, defenderIdx, color, confirmations: {} };
+      return { d: { ...d, openMatches: [...d.openMatches, match], colorCounter: d.colorCounter + 1, selectedIndex: null, activeModal: null, toast: 'Neues offenes Match: ' + d.players[challengerIdx].name + ' vs. ' + d.players[defenderIdx].name + '.' } };
+    });
+  }
+
+  openMatchFromListD(matchId) { this.setState(s => ({ d: { ...s.d, activeModal: { type: 'action', matchId } } })); }
+
+  // Pure computation: resolves a match (challenger win or defender win), applying the
+  // ladder rotation and remapping any still-open matches' indices plus the viewer's own
+  // session pointer. Returns the new `d` slice; callers wrap this in setState.
+  resolveMatchSlice(d, match, winnerIdx) {
+    const challengerName = d.players[match.challengerIdx].name;
+    const defenderName = d.players[match.defenderIdx].name;
+    let players = d.players;
+    let toast;
+    let remaining = d.openMatches.filter(m => m.id !== match.id);
+    let session = d.session;
+    if (winnerIdx === match.challengerIdx) {
+      players = this.applyChallengeWinObjects(players, match.challengerIdx, match.defenderIdx);
+      toast = challengerName + ' gewinnt und übernimmt Rang ' + (match.defenderIdx + 1) + '.';
+      const cIdx = match.challengerIdx, dIdx2 = match.defenderIdx;
+      const mapIdx = (i) => (i === cIdx ? dIdx2 : (i >= dIdx2 && i < cIdx ? i + 1 : i));
+      remaining = remaining.map(m => ({ ...m, challengerIdx: mapIdx(m.challengerIdx), defenderIdx: mapIdx(m.defenderIdx) }));
+      if (session && session.role === 'player') session = { ...session, idx: mapIdx(session.idx) };
+    } else {
+      toast = defenderName + ' verteidigt die Position gegen ' + challengerName + '.';
+    }
+    return { ...d, players, openMatches: remaining, activeModal: null, toast, session };
+  }
+
+  // Called by a participant confirming the result from their own point of view. The match
+  // only closes once both challenger and defender have confirmed the SAME winner.
+  confirmResultD(matchId, winnerIdx) {
+    this.setState(s => {
+      const d = s.d;
+      const match = d.openMatches.find(m => m.id === matchId);
+      if (!match || !d.session || d.session.role !== 'player') return null;
+      const selfIdx = d.session.idx;
+      if (selfIdx !== match.challengerIdx && selfIdx !== match.defenderIdx) return null;
+      const confirmations = { ...match.confirmations, [selfIdx]: winnerIdx };
+      const bothIn = confirmations[match.challengerIdx] !== undefined && confirmations[match.defenderIdx] !== undefined;
+      const agree = bothIn && confirmations[match.challengerIdx] === confirmations[match.defenderIdx];
+      if (agree) {
+        return { d: this.resolveMatchSlice(d, { ...match, confirmations }, confirmations[match.challengerIdx]) };
+      }
+      const otherIdx = selfIdx === match.challengerIdx ? match.defenderIdx : match.challengerIdx;
+      const openMatches = d.openMatches.map(m => (m.id === matchId ? { ...m, confirmations } : m));
+      const msg = bothIn
+        ? 'Eure Angaben stimmen nicht überein — bitte klären oder vom Admin entscheiden lassen.'
+        : 'Bestätigung gespeichert. Warte auf Bestätigung von ' + d.players[otherIdx].name + '.';
+      return { d: { ...d, openMatches, activeModal: null, toast: msg } };
+    });
+  }
+
+  // Admin override: sets the winner immediately, ignoring player confirmations.
+  adminSetWinnerD(matchId, winnerIdx) {
+    this.setState(s => {
+      const d = s.d;
+      const match = d.openMatches.find(m => m.id === matchId);
+      if (!match || !d.session || d.session.role !== 'admin') return null;
+      return { d: this.resolveMatchSlice(d, match, winnerIdx) };
+    });
+  }
+
+  // Admin override: cancels an open match at any time, no rotation applied.
+  cancelMatchD(matchId) {
+    this.setState(s => {
+      const d = s.d;
+      if (!d.session || d.session.role !== 'admin') return null;
+      const match = d.openMatches.find(m => m.id === matchId);
+      if (!match) return null;
+      const openMatches = d.openMatches.filter(m => m.id !== matchId);
+      return { d: { ...d, openMatches, activeModal: null, toast: 'Match zwischen ' + d.players[match.challengerIdx].name + ' und ' + d.players[match.defenderIdx].name + ' wurde vom Admin abgebrochen.' } };
+    });
+  }
+
+  applyChallengeWinObjects(players, challengerIdx, defenderIdx) {
+    const arr = players.slice();
+    const challenger = arr[challengerIdx];
+    arr.splice(challengerIdx, 1);
+    arr.splice(defenderIdx, 0, challenger);
+    return arr;
+  }
+
+  cardStyleForD(isSelected, isTarget, lockColor, isSelf, clickable) {
+    const base = "padding:10px 16px;border-radius:14px;font-family:inherit;display:flex;flex-direction:column;align-items:center;gap:2px;min-width:112px;transition:all .15s;" + (clickable ? "cursor:pointer;" : "cursor:default;");
+    if (lockColor) return base + "background:color-mix(in oklch, " + lockColor + " 16%, white);border:1.5px solid " + lockColor + ";box-shadow:0 0 0 2px color-mix(in oklch, " + lockColor + " 25%, transparent);";
+    if (isSelected) return base + "background:oklch(0.96 0.03 155);border:1.5px solid oklch(0.55 0.13 155);box-shadow:0 0 0 3px oklch(0.55 0.13 155 / 0.15);";
+    if (isTarget) return base + "background:oklch(0.98 0.03 115);border:1.5px dashed oklch(0.78 0.16 115);";
+    if (isSelf) return base + "background:white;border:1.5px solid oklch(0.55 0.13 155 / 0.5);";
+    return base + "background:white;border:1.5px solid oklch(0.9 0.01 90);";
+  }
+
+  buildViewD() {
+    const d = this.state.d;
+
+    if (!d.session) {
+      return {
+        isLogin: true, isChangePassword: false, isApp: false,
+        isPlayerTab: d.loginTab === 'player', isAdminTab: d.loginTab === 'admin',
+        playerTabStyle: this.tabPillStyle(d.loginTab === 'player'), adminTabStyle: this.tabPillStyle(d.loginTab === 'admin'),
+        onSetPlayerTab: () => this.setLoginTab('player'), onSetAdminTab: () => this.setLoginTab('admin'),
+        loginEmail: d.loginEmail, onLoginEmailChange: (e) => this.setLoginEmail(e.target.value),
+        loginPassword: d.loginPassword, onLoginPasswordChange: (e) => this.setLoginPassword(e.target.value),
+        loginUsername: d.loginUsername, onLoginUsernameChange: (e) => this.setLoginUsername(e.target.value),
+        loginError: d.loginError, hasLoginError: !!d.loginError,
+        onSubmitPlayerLogin: () => this.submitPlayerLoginD(), onSubmitAdminLogin: () => this.submitAdminLoginD(),
+      };
+    }
+
+    if (d.session.role === 'player' && d.players[d.session.idx].mustChangePassword) {
+      return {
+        isLogin: false, isChangePassword: true, isApp: false,
+        selfName: d.players[d.session.idx].name,
+        pwNew: d.pwNew, onPwNewChange: (e) => this.setPwNew(e.target.value),
+        pwConfirm: d.pwConfirm, onPwConfirmChange: (e) => this.setPwConfirm(e.target.value),
+        pwError: d.pwError, hasPwError: !!d.pwError,
+        onSubmitPasswordChange: () => this.submitPasswordChangeD(), onLogout: () => this.logoutD(),
+      };
+    }
+
+    const n = d.players.length;
+    const lockMap = new Map();
+    d.openMatches.forEach(m => { lockMap.set(m.challengerIdx, m.color); lockMap.set(m.defenderIdx, m.color); });
+    const isPlayer = d.session.role === 'player';
+    const self = isPlayer ? d.session.idx : null;
+    const targets = (isPlayer && d.selectedIndex === self && !lockMap.has(self)) ? this.getTargets(n, self) : { leftIdx: [], aboveIdx: [] };
+    const targetSet = new Set([...targets.leftIdx, ...targets.aboveIdx].filter(j => !lockMap.has(j)));
+
+    const rowCount = this.coordsForIndex(n - 1).row + 1;
+    const rows = [];
+    for (let r = 0; r < rowCount; r++) {
+      const start = this.triangular(r);
+      const end = Math.min(this.triangular(r + 1), n);
+      const players = [];
+      for (let i = start; i < end; i++) {
+        const isSelected = d.selectedIndex === i;
+        const isTarget = targetSet.has(i);
+        const isSelf = isPlayer && i === self;
+        const lockColor = lockMap.get(i) || null;
+        const clickable = !!lockColor || (isPlayer && (isSelf || isTarget));
+        const onClick = lockColor
+          ? () => this.selectPlayerD(i)
+          : (isPlayer && isSelf ? () => this.selectPlayerD(i) : (isPlayer && isTarget ? () => this.pickTargetD(i) : () => {}));
+        players.push({ idx: i, name: d.players[i].name, rank: i + 1, cardStyle: this.cardStyleForD(isSelected, isTarget, lockColor, isSelf, clickable), onClick });
+      }
+      rows.push({ r, label: 'Runde ' + (r + 1), players });
+    }
+
+    let selected = null;
+    if (isPlayer && d.selectedIndex === self && !lockMap.has(self)) {
+      const idx = self;
+      const list = [];
+      targets.leftIdx.filter(j => !lockMap.has(j)).forEach(j => list.push({ idx: j, name: d.players[j].name, rank: j + 1, type: 'Gleiche Reihe · links', onChallenge: () => this.pickTargetD(j) }));
+      targets.aboveIdx.filter(j => !lockMap.has(j)).forEach(j => list.push({ idx: j, name: d.players[j].name, rank: j + 1, type: 'Reihe höher · rechts', onChallenge: () => this.pickTargetD(j) }));
+      selected = { idx, name: d.players[idx].name, rank: idx + 1, hasTargets: list.length > 0, noTargets: list.length === 0, targetList: list, onClose: () => this.selectPlayerD(idx) };
+    }
+
+    let modal = null;
+    if (d.activeModal) {
+      if (d.activeModal.type === 'confirm') {
+        const { challengerIdx, defenderIdx } = d.activeModal;
+        modal = {
+          isConfirm: true, isAction: false,
+          challengerName: d.players[challengerIdx].name, challengerRank: challengerIdx + 1,
+          defenderName: d.players[defenderIdx].name, defenderRank: defenderIdx + 1,
+          onClose: () => this.closeModalD(), onConfirm: () => this.confirmNewMatchD(),
+        };
+      } else {
+        const match = d.openMatches.find(m => m.id === d.activeModal.matchId);
+        const cIdx = match.challengerIdx, dfIdx = match.defenderIdx;
+        const challengerName = d.players[cIdx].name, defenderName = d.players[dfIdx].name;
+        const cConf = match.confirmations[cIdx], dConf = match.confirmations[dfIdx];
+        const hasMismatch = cConf !== undefined && dConf !== undefined && cConf !== dConf;
+        const reportText = (idx, conf) => conf === undefined ? 'Noch keine Meldung' : (conf === cIdx ? challengerName + ' gewinnt' : defenderName + ' gewinnt');
+        const isParticipant = isPlayer && (self === cIdx || self === dfIdx);
+        const isAdminViewer = !isPlayer;
+        const isReadOnly = !isParticipant && !isAdminViewer;
+        const selfConf = isParticipant ? match.confirmations[self] : undefined;
+        const otherIdx = isParticipant ? (self === cIdx ? dfIdx : cIdx) : null;
+        const otherConf = otherIdx != null ? match.confirmations[otherIdx] : undefined;
+        modal = {
+          isConfirm: false, isAction: true, color: match.color,
+          challengerName, challengerRank: cIdx + 1, defenderName, defenderRank: dfIdx + 1,
+          isAdminViewer, isParticipant, isReadOnly, hasMismatch,
+          challengerReportText: reportText(cIdx, cConf), defenderReportText: reportText(dfIdx, dConf),
+          otherName: otherIdx != null ? d.players[otherIdx].name : null,
+          waitingForOther: selfConf !== undefined && otherConf === undefined,
+          otherPendingYou: otherConf !== undefined && selfConf === undefined,
+          onClose: () => this.closeModalD(),
+          onConfirmSelfWin: () => this.confirmResultD(match.id, self),
+          onConfirmOtherWin: () => this.confirmResultD(match.id, otherIdx),
+          onAdminWinChallenger: () => this.adminSetWinnerD(match.id, cIdx),
+          onAdminWinDefender: () => this.adminSetWinnerD(match.id, dfIdx),
+          onAdminCancel: () => this.cancelMatchD(match.id),
+        };
+      }
+    }
+
+    const openMatchesView = d.openMatches.map(m => ({
+      id: m.id, color: m.color,
+      challengerName: d.players[m.challengerIdx].name, challengerRank: m.challengerIdx + 1,
+      defenderName: d.players[m.defenderIdx].name, defenderRank: m.defenderIdx + 1,
+      onOpen: () => this.openMatchFromListD(m.id),
+    }));
+
+    const adminPlayers = d.players.map((p, idx) => ({
+      idx, name: p.name, email: p.email, rank: idx + 1, locked: lockMap.has(idx), unlocked: !lockMap.has(idx),
+      mustChange: p.mustChangePassword, onRemove: () => this.removePlayerD(idx),
+    }));
+
+    return {
+      isLogin: false, isChangePassword: false, isApp: true,
+      isAdminRole: !isPlayer, isPlayerRole: isPlayer,
+      selfName: isPlayer ? d.players[self].name : null, selfRank: isPlayer ? self + 1 : null,
+      rows, selected, modal,
+      openMatches: openMatchesView, hasOpenMatches: openMatchesView.length > 0, noOpenMatches: openMatchesView.length === 0,
+      adminPlayers, count: n,
+      newPlayerName: d.newPlayerName, onNewPlayerNameChange: (e) => this.setNewPlayerName(e.target.value),
+      newPlayerEmail: d.newPlayerEmail, onNewPlayerEmailChange: (e) => this.setNewPlayerEmail(e.target.value),
+      newPlayerPassword: d.newPlayerPassword, onNewPlayerPasswordChange: (e) => this.setNewPlayerPassword(e.target.value),
+      onGeneratePassword: () => this.generatePasswordD(),
+      onAddPlayer: () => this.addPlayerD(), onReset: () => this.resetLadderD(),
+      toast: d.toast, onDismissToast: () => this.dismissToastD(),
+      onLogout: () => this.logoutD(),
+    };
+  }
+
+  buildView(key, variant) {
+    const s = this.state[key];
+    const n = s.players.length;
+    const targets = s.selectedIndex != null ? this.getTargets(n, s.selectedIndex) : { leftIdx: [], aboveIdx: [] };
+    const targetSet = new Set([...targets.leftIdx, ...targets.aboveIdx]);
+    const rowCount = this.coordsForIndex(n - 1).row + 1;
+    const rows = [];
+    for (let r = 0; r < rowCount; r++) {
+      const start = this.triangular(r);
+      const end = Math.min(this.triangular(r + 1), n);
+      const players = [];
+      for (let i = start; i < end; i++) {
+        const isSelected = s.selectedIndex === i;
+        const isTarget = targetSet.has(i);
+        const onClick = (s.selectedIndex != null && !isSelected && isTarget)
+          ? () => this.pickTarget(key, i)
+          : () => this.selectPlayer(key, i);
+        players.push({
+          idx: i,
+          name: s.players[i],
+          rank: i + 1,
+          cardStyle: this.cardStyleFor(isSelected, isTarget),
+          chipStyle: this.chipStyleFor(isSelected, isTarget),
+          onClick,
+        });
+      }
+      rows.push({ r, label: 'Runde ' + (r + 1), players });
+    }
+
+    let selected = null;
+    if (s.selectedIndex != null) {
+      const idx = s.selectedIndex;
+      const list = [];
+      targets.leftIdx.forEach(j => list.push({ idx: j, name: s.players[j], rank: j + 1, type: 'Gleiche Reihe · links', onChallenge: () => this.pickTarget(key, j) }));
+      targets.aboveIdx.forEach(j => list.push({ idx: j, name: s.players[j], rank: j + 1, type: 'Reihe höher · rechts', onChallenge: () => this.pickTarget(key, j) }));
+      selected = { idx, name: s.players[idx], rank: idx + 1, hasTargets: list.length > 0, noTargets: list.length === 0, targetList: list, onClose: () => this.selectPlayer(key, idx) };
+    }
+
+    let modal = null;
+    if (s.modal) {
+      const { challengerIdx, defenderIdx, step } = s.modal;
+      modal = {
+        isConfirm: step === 'confirm',
+        isResult: step === 'result',
+        challengerName: s.players[challengerIdx], challengerRank: challengerIdx + 1,
+        defenderName: s.players[defenderIdx], defenderRank: defenderIdx + 1,
+        onClose: () => this.closeModal(key),
+        onConfirm: () => this.confirmChallenge(key),
+        onWinChallenger: () => this.pickWinner(key, challengerIdx),
+        onWinDefender: () => this.pickWinner(key, defenderIdx),
+      };
+    }
+
+    const adminPlayers = s.players.map((name, idx) => ({ idx, name, rank: idx + 1, onRemove: () => this.removePlayer(key, idx) }));
+
+    const tabBase = "flex:1;padding:14px;font-size:13px;font-weight:700;background:none;cursor:pointer;font-family:inherit;border:none;border-bottom:2px solid transparent;color:oklch(0.55 0.02 90);";
+    const tabActive = "flex:1;padding:14px;font-size:13px;font-weight:700;background:none;cursor:pointer;font-family:inherit;border:none;border-bottom:2px solid oklch(0.55 0.15 115);color:oklch(0.22 0.02 90);";
+
+    return {
+      rows,
+      selected,
+      modal,
+      adminOpen: s.adminOpen,
+      onToggleAdmin: () => this.toggleAdmin(key),
+      adminPlayers,
+      newName: s.newName,
+      onNewNameChange: (e) => this.setNewName(key, e.target.value),
+      onNewNameKey: (e) => this.handleNameKey(key, e),
+      onAddPlayer: () => this.addPlayer(key),
+      onReset: () => this.resetLadder(key),
+      toast: s.toast,
+      onDismissToast: () => this.dismissToast(key),
+      count: n,
+      isChallengeTab: s.activeTab !== 'admin',
+      isAdminTab: s.activeTab === 'admin',
+      noSelection: s.selectedIndex == null,
+      tabChallengeStyle: s.activeTab !== 'admin' ? tabActive : tabBase,
+      tabAdminStyle: s.activeTab === 'admin' ? tabActive : tabBase,
+      onSetTabChallenge: () => this.setTab(key, 'challenge'),
+      onSetTabAdmin: () => this.setTab(key, 'admin'),
+    };
+  }
+
+  renderVals() {
+    const a = this.buildView('a', 'a');
+    const b = this.buildView('b', 'b');
+    const c = this.buildViewC();
+    const d = this.buildViewD();
+    return {
+      aRows: a.rows, aSelected: a.selected, aModal: a.modal, aAdminOpen: a.adminOpen, aOnToggleAdmin: a.onToggleAdmin,
+      aAdminPlayers: a.adminPlayers, aNewName: a.newName, aOnNewNameChange: a.onNewNameChange, aOnNewNameKey: a.onNewNameKey,
+      aOnAddPlayer: a.onAddPlayer, aOnReset: a.onReset, aToast: a.toast, aOnDismissToast: a.onDismissToast, aCount: a.count,
+
+      bRows: b.rows, bSelected: b.selected, bModal: b.modal, bAdminPlayers: b.adminPlayers,
+      bNewName: b.newName, bOnNewNameChange: b.onNewNameChange, bOnNewNameKey: b.onNewNameKey,
+      bOnAddPlayer: b.onAddPlayer, bOnReset: b.onReset, bToast: b.toast, bOnDismissToast: b.onDismissToast, bCount: b.count,
+      bIsChallengeTab: b.isChallengeTab, bIsAdminTab: b.isAdminTab, bNoSelection: b.noSelection,
+      bTabChallengeStyle: b.tabChallengeStyle, bTabAdminStyle: b.tabAdminStyle,
+      bOnSetTabChallenge: b.onSetTabChallenge, bOnSetTabAdmin: b.onSetTabAdmin,
+
+      cRows: c.rows, cSelected: c.selected, cModal: c.modal,
+      cOpenMatches: c.openMatches, cHasOpenMatches: c.hasOpenMatches, cNoOpenMatches: c.noOpenMatches,
+      cAdminOpen: c.adminOpen, cOnToggleAdmin: c.onToggleAdmin, cAdminPlayers: c.adminPlayers,
+      cNewName: c.newName, cOnNewNameChange: c.onNewNameChange, cOnNewNameKey: c.onNewNameKey,
+      cOnAddPlayer: c.onAddPlayer, cOnReset: c.onReset, cToast: c.toast, cOnDismissToast: c.onDismissToast, cCount: c.count,
+
+      dIsLogin: d.isLogin, dIsChangePassword: d.isChangePassword, dIsApp: d.isApp,
+      dIsPlayerTab: d.isPlayerTab, dIsAdminTab: d.isAdminTab, dPlayerTabStyle: d.playerTabStyle, dAdminTabStyle: d.adminTabStyle,
+      dOnSetPlayerTab: d.onSetPlayerTab, dOnSetAdminTab: d.onSetAdminTab,
+      dLoginEmail: d.loginEmail, dOnLoginEmailChange: d.onLoginEmailChange,
+      dLoginPassword: d.loginPassword, dOnLoginPasswordChange: d.onLoginPasswordChange,
+      dLoginUsername: d.loginUsername, dOnLoginUsernameChange: d.onLoginUsernameChange,
+      dLoginError: d.loginError, dHasLoginError: d.hasLoginError,
+      dOnSubmitPlayerLogin: d.onSubmitPlayerLogin, dOnSubmitAdminLogin: d.onSubmitAdminLogin,
+
+      dSelfName: d.selfName, dSelfRank: d.selfRank,
+      dPwNew: d.pwNew, dOnPwNewChange: d.onPwNewChange, dPwConfirm: d.pwConfirm, dOnPwConfirmChange: d.onPwConfirmChange,
+      dPwError: d.pwError, dHasPwError: d.hasPwError, dOnSubmitPasswordChange: d.onSubmitPasswordChange, dOnLogout: d.onLogout,
+
+      dIsAdminRole: d.isAdminRole, dIsPlayerRole: d.isPlayerRole,
+      dRows: d.rows, dSelected: d.selected, dModal: d.modal,
+      dOpenMatches: d.openMatches, dHasOpenMatches: d.hasOpenMatches, dNoOpenMatches: d.noOpenMatches,
+      dAdminPlayers: d.adminPlayers, dCount: d.count,
+      dNewPlayerName: d.newPlayerName, dOnNewPlayerNameChange: d.onNewPlayerNameChange,
+      dNewPlayerEmail: d.newPlayerEmail, dOnNewPlayerEmailChange: d.onNewPlayerEmailChange,
+      dNewPlayerPassword: d.newPlayerPassword, dOnNewPlayerPasswordChange: d.onNewPlayerPasswordChange,
+      dOnGeneratePassword: d.onGeneratePassword, dOnAddPlayer: d.onAddPlayer, dOnReset: d.onReset,
+      dToast: d.toast, dOnDismissToast: d.onDismissToast,
+    };
+  }
+}
+
+</script>
+</body>
+</html>

@@ -1,0 +1,6 @@
+[
+  {
+    "username": "vorstand",
+    "passwordHash": "REPLACE_ME_RUN_scripts/hash_password.py"
+  }
+]

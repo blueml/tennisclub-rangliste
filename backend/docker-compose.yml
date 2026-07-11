@@ -1,0 +1,17 @@
+services:
+  rangliste:
+    build: .
+    ports:
+      - "8080:8080"
+    environment:
+      - JWT_SECRET=${JWT_SECRET:?set a real secret in a .env file}
+      - ADMINS_PATH=/config/admins.json
+      - PLAYERS_PATH=/data/players.json
+      - MATCHES_PATH=/data/matches.json
+    volumes:
+      - ./config/admins.json:/config/admins.json:ro
+      - rangliste-data:/data
+    restart: unless-stopped
+
+volumes:
+  rangliste-data:

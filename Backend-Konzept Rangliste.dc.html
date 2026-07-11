@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet data-dc-atomics>
+<style>doc-page:not(:defined){visibility:hidden}</style>
+<style>
+body{margin:0;background:oklch(0.94 0.004 90)}
+h1,h2,h3{font-family:'Manrope',system-ui,sans-serif;color:oklch(0.2 0.02 90)}
+p,li,td,th{font-family:'Manrope',system-ui,sans-serif}
+code,pre{font-family:'JetBrains Mono',ui-monospace,Menlo,monospace}
+a{color:oklch(0.5 0.13 155)}
+a:hover{color:oklch(0.4 0.13 155)}
+</style>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+</helmet>
+<x-import component-from-global-scope="doc-page" from="./doc-page.js" size="a4" orientation="portrait" margin="0.85in" hint-size="100%,100%">
+
+<h1 style="font-size:28px;font-weight:800;margin:0 0 4px;letter-spacing:-0.01em">Backend-Konzept: Tennisclub-Rangliste</h1>
+<p style="font-size:13px;color:oklch(0.5 0.02 90);margin:0 0 32px">Single-Node-Betrieb im Docker-Container · Speicherung als JSON-Dateien · Backend in Python · Stand 11. Juli 2026</p>
+
+<h2 style="font-size:19px;font-weight:700;margin:0 0 10px;border-bottom:1px solid oklch(0.88 0.01 90);padding-bottom:8px">1. Überblick</h2>
+<p style="font-size:14.5px;line-height:1.65;color:oklch(0.3 0.02 90)">Die Anwendung läuft als ein Prozess in einem Docker-Container auf einem einzelnen Linux-Host. Es gibt bewusst keine verteilte Architektur und keine Datenbank — alle veränderlichen Daten liegen in JSON-Dateien auf einem gemounteten Docker-Volume. Das hält Betrieb und Backup denkbar einfach und passt zur Größe eines einzelnen Vereins.</p>
+<p style="font-size:14.5px;line-height:1.65;color:oklch(0.3 0.02 90)">Zwei Rollen greifen auf dieselbe Anwendung zu: <strong>Admin</strong> (verwaltet Spieler:innen, entscheidet Streitfälle) und <strong>Spieler:in</strong> (fordert heraus, bestätigt Ergebnisse). Die Admin-Zugangsdaten werden separat von den Spielerdaten gepflegt, da sie sich selten ändern und nicht über die App-UI bearbeitbar sind.</p>
+
+<h2 style="font-size:19px;font-weight:700;margin:28px 0 10px;border-bottom:1px solid oklch(0.88 0.01 90);padding-bottom:8px">2. Dateien &amp; Speicherorte</h2>
+<table style="width:100%;border-collapse:collapse;font-size:13.5px;margin-bottom:6px">
+<thead>
+<tr style="background:oklch(0.97 0.006 90)">
+<th style="text-align:left;padding:8px 10px;border:1px solid oklch(0.85 0.01 90)">Pfad</th>
+<th style="text-align:left;padding:8px 10px;border:1px solid oklch(0.85 0.01 90)">Inhalt</th>
+<th style="text-align:left;padding:8px 10px;border:1px solid oklch(0.85 0.01 90)">Mount</th>
+</tr>
+</thead>
+<tbody>
+<tr><td style="padding:8px 10px;border:1px solid oklch(0.88 0.01 90)"><code>/config/admins.json</code></td><td style="padding:8px 10px;border:1px solid oklch(0.88 0.01 90)">Admin-Konten (Benutzername + Passwort-Hash)</td><td style="padding:8px 10px;border:1px solid oklch(0.88 0.01 90)">read-only Bind-Mount</td></tr>
+<tr><td style="padding:8px 10px;border:1px solid oklch(0.88 0.01 90)"><code>/data/players.json</code></td><td style="padding:8px 10px;border:1px solid oklch(0.88 0.01 90)">Spieler:innen inkl. Rangfolge</td><td style="padding:8px 10px;border:1px solid oklch(0.88 0.01 90)">Docker-Volume, read/write</td></tr>
+<tr><td style="padding:8px 10px;border:1px solid oklch(0.88 0.01 90)"><code>/data/matches.json</code></td><td style="padding:8px 10px;border:1px solid oklch(0.88 0.01 90)">Offene &amp; abgeschlossene Matches</td><td style="padding:8px 10px;border:1px solid oklch(0.88 0.01 90)">Docker-Volume, read/write</td></tr>
+</tbody>
+</table>
+<p style="font-size:13px;color:oklch(0.5 0.02 90);margin:0 0 20px">Trennung von Config und Daten: <code>admins.json</code> ändert sich nur durch einen Deploy/Ops-Eingriff, <code>players.json</code>/<code>matches.json</code> ändern sich durch App-Nutzung — unterschiedliche Backup- und Zugriffsanforderungen.</p>
+
+<h3 style="font-size:15.5px;font-weight:700;margin:18px 0 8px">admins.json</h3>
+<pre style="background:oklch(0.97 0.004 90);border:1px solid oklch(0.88 0.01 90);border-radius:8px;padding:14px 16px;font-size:12.5px;line-height:1.6;overflow-x:auto;break-inside:avoid">[
+  {
+    "username": "vorstand",
+    "passwordHash": "$2b$12$...",
+    "role": "admin"
+  }
+]</pre>
+
+<h3 style="font-size:15.5px;font-weight:700;margin:18px 0 8px">players.json</h3>
+<pre style="background:oklch(0.97 0.004 90);border:1px solid oklch(0.88 0.01 90);border-radius:8px;padding:14px 16px;font-size:12.5px;line-height:1.6;overflow-x:auto;break-inside:avoid">{
+  "players": [
+    {
+      "id": "p_lena",
+      "name": "Lena Bauer",
+      "email": "lena.bauer@tcwaldpark.de",
+      "passwordHash": "$2b$12$...",
+      "mustChangePassword": false,
+      "createdAt": "2026-03-01T10:00:00Z"
+    }
+  ],
+  "ranking": ["p_lena", "p_jonas", "p_mia", "..."]
+}</pre>
+<p style="font-size:13px;color:oklch(0.5 0.02 90);margin:0 0 0">Die Baum-/Pyramidenposition jeder Person ergibt sich rein aus ihrem Index im <code>ranking</code>-Array (Zeile/Spalte werden aus der Dreieckszahl-Formel berechnet) — das Array ist die einzige Quelle der Wahrheit für die Rangfolge, damit Gewinn-Rotationen ein simples Array-Splice bleiben.</p>
+
+<h3 style="font-size:15.5px;font-weight:700;margin:18px 0 8px">matches.json</h3>
+<pre style="background:oklch(0.97 0.004 90);border:1px solid oklch(0.88 0.01 90);border-radius:8px;padding:14px 16px;font-size:12.5px;line-height:1.6;overflow-x:auto;break-inside:avoid">{
+  "matches": [
+    {
+      "id": "m_0007",
+      "challengerId": "p_sophie",
+      "defenderId": "p_mia",
+      "status": "open",
+      "confirmations": { "p_sophie": "p_sophie" },
+      "createdAt": "2026-07-10T18:04:00Z",
+      "resolvedAt": null,
+      "resolvedBy": null
+    }
+  ]
+}</pre>
+<p style="font-size:13px;color:oklch(0.5 0.02 90)"><code>status</code>: <code>open</code> · <code>resolved</code> · <code>cancelled</code>. <code>confirmations</code> sammelt pro Spieler-ID die von ihr gemeldete Gewinner-ID; das Match schließt automatisch, sobald beide Einträge vorhanden sind und übereinstimmen. <code>resolvedBy</code> ist <code>null</code> bei beidseitiger Bestätigung, sonst die Admin-ID (Override).</p>
+
+<h2 style="font-size:19px;font-weight:700;margin:28px 0 10px;border-bottom:1px solid oklch(0.88 0.01 90);padding-bottom:8px">3. Technologie-Stack</h2>
+<ul style="font-size:14.5px;line-height:1.7;color:oklch(0.3 0.02 90)">
+<li><strong>FastAPI</strong> (Python 3.12) als Web-Framework — asynchron, mit Pydantic-Modellen für Player, Match, Admin-Konto und automatischer Request-Validierung.</li>
+<li><strong>Uvicorn</strong> als ASGI-Server im Container.</li>
+<li><strong>passlib[bcrypt]</strong> für Passwort-Hashing, <strong>PyJWT</strong> für signierte Session-Cookies.</li>
+<li>Eigene kleine <code>JsonStore</code>-Klasse pro Datei (siehe Abschnitt 4) — keine ORM/DB-Bibliothek nötig.</li>
+<li>Das bestehende React-Frontend wird als statischer Vite-Build von FastAPI mitausgeliefert (<code>StaticFiles</code>-Mount) — ein Container, ein Deploy.</li>
+</ul>
+
+<h2 style="font-size:19px;font-weight:700;margin:28px 0 10px;border-bottom:1px solid oklch(0.88 0.01 90);padding-bottom:8px">4. Nebenläufiger Dateizugriff</h2>
+<p style="font-size:14.5px;line-height:1.65;color:oklch(0.3 0.02 90)">JSON-Dateien haben kein eingebautes Transaktions- oder Sperrkonzept — das muss die Anwendung selbst sicherstellen, sonst überschreiben sich parallele Schreibzugriffe (z. B. zwei gleichzeitige Ergebnisbestätigungen):</p>
+<ul style="font-size:14.5px;line-height:1.7;color:oklch(0.3 0.02 90)">
+<li><strong>Serialisierte Schreibqueue pro Datei</strong> im Prozess: jede Änderung an <code>players.json</code> bzw. <code>matches.json</code> läuft durch ein <code>asyncio.Lock</code> je Datei, sodass immer nur ein Schreibvorgang gleichzeitig aktiv ist. Ausreichend, solange nur ein Anwendungsprozess läuft (Single-Node-Vorgabe, ein Uvicorn-Worker).</li>
+<li><strong>Atomic Write</strong>: neuen Inhalt nach <code>players.json.tmp</code> schreiben, dann per <code>rename()</code> über die Zieldatei legen — verhindert kaputte/halb geschriebene Dateien bei einem Absturz mitten im Schreibvorgang.</li>
+<li><strong>Read-modify-write innerhalb der Queue</strong>: jede Operation liest die aktuelle Datei, wendet die Änderung im Speicher an und schreibt sie zurück, bevor die nächste Operation in der Queue startet — das ersetzt row-level Locking einer Datenbank.</li>
+</ul>
+
+<h2 style="font-size:19px;font-weight:700;margin:28px 0 10px;border-bottom:1px solid oklch(0.88 0.01 90);padding-bottom:8px">5. Authentifizierung</h2>
+<ul style="font-size:14.5px;line-height:1.7;color:oklch(0.3 0.02 90)">
+<li>Passwörter nie im Klartext speichern — <strong>bcrypt-Hash über passlib</strong> in beiden JSON-Dateien.</li>
+<li>Login erzeugt ein <strong>signiertes Session-Cookie</strong> (JWT via PyJWT, httpOnly + Secure) mit Rolle (<code>admin</code>/<code>player</code>) und bei Spieler:innen der <code>playerId</code>.</li>
+<li>Server-seitige Middleware prüft bei jedem Request die Rolle: Admin-Endpunkte erfordern <code>role=admin</code>, Herausforderungs-/Bestätigungs-Endpunkte erfordern <code>role=player</code> <em>und</em> <code>mustChangePassword=false</code>.</li>
+<li>Neu angelegte Spieler:innen starten mit <code>mustChangePassword: true</code>; der Passwortänderungs-Endpunkt ist der einzige, den ein Spieler mit gesetztem Flag aufrufen darf, bevor er/sie sonst etwas tun kann.</li>
+</ul>
+
+<h2 style="font-size:19px;font-weight:700;margin:28px 0 10px;border-bottom:1px solid oklch(0.88 0.01 90);padding-bottom:8px">6. API-Endpunkte</h2>
+<table style="width:100%;border-collapse:collapse;font-size:13px;margin-bottom:6px">
+<thead>
+<tr style="background:oklch(0.97 0.006 90)">
+<th style="text-align:left;padding:7px 9px;border:1px solid oklch(0.85 0.01 90)">Methode &amp; Pfad</th>
+<th style="text-align:left;padding:7px 9px;border:1px solid oklch(0.85 0.01 90)">Rolle</th>
+<th style="text-align:left;padding:7px 9px;border:1px solid oklch(0.85 0.01 90)">Zweck</th>
+</tr>
+</thead>
+<tbody>
+<tr><td style="padding:7px 9px;border:1px solid oklch(0.88 0.01 90)"><code>POST /api/auth/player-login</code></td><td style="padding:7px 9px;border:1px solid oklch(0.88 0.01 90)">öffentlich</td><td style="padding:7px 9px;border:1px solid oklch(0.88 0.01 90)">E-Mail + Kennwort → Session</td></tr>
+<tr><td style="padding:7px 9px;border:1px solid oklch(0.88 0.01 90)"><code>POST /api/auth/admin-login</code></td><td style="padding:7px 9px;border:1px solid oklch(0.88 0.01 90)">öffentlich</td><td style="padding:7px 9px;border:1px solid oklch(0.88 0.01 90)">Benutzername + Kennwort → Session</td></tr>
+<tr><td style="padding:7px 9px;border:1px solid oklch(0.88 0.01 90)"><code>POST /api/auth/logout</code></td><td style="padding:7px 9px;border:1px solid oklch(0.88 0.01 90)">beide</td><td style="padding:7px 9px;border:1px solid oklch(0.88 0.01 90)">Session beenden</td></tr>
+<tr><td style="padding:7px 9px;border:1px solid oklch(0.88 0.01 90)"><code>POST /api/auth/change-password</code></td><td style="padding:7px 9px;border:1px solid oklch(0.88 0.01 90)">Spieler:in</td><td style="padding:7px 9px;border:1px solid oklch(0.88 0.01 90)">Pflicht-/freiwilliger Kennwortwechsel</td></tr>
+<tr><td style="padding:7px 9px;border:1px solid oklch(0.88 0.01 90)"><code>GET /api/ranking</code></td><td style="padding:7px 9px;border:1px solid oklch(0.88 0.01 90)">beide</td><td style="padding:7px 9px;border:1px solid oklch(0.88 0.01 90)">Rangliste + offene Matches lesen</td></tr>
+<tr><td style="padding:7px 9px;border:1px solid oklch(0.88 0.01 90)"><code>POST /api/matches</code></td><td style="padding:7px 9px;border:1px solid oklch(0.88 0.01 90)">Spieler:in</td><td style="padding:7px 9px;border:1px solid oklch(0.88 0.01 90)">Herausforderung eröffnen (Regelprüfung serverseitig)</td></tr>
+<tr><td style="padding:7px 9px;border:1px solid oklch(0.88 0.01 90)"><code>POST /api/matches/:id/confirm</code></td><td style="padding:7px 9px;border:1px solid oklch(0.88 0.01 90)">Spieler:in</td><td style="padding:7px 9px;border:1px solid oklch(0.88 0.01 90)">Eigenes Ergebnis melden; schließt bei Übereinstimmung</td></tr>
+<tr><td style="padding:7px 9px;border:1px solid oklch(0.88 0.01 90)"><code>POST /api/admin/players</code></td><td style="padding:7px 9px;border:1px solid oklch(0.88 0.01 90)">Admin</td><td style="padding:7px 9px;border:1px solid oklch(0.88 0.01 90)">Spieler:in anlegen (Name, E-Mail, initiales Kennwort)</td></tr>
+<tr><td style="padding:7px 9px;border:1px solid oklch(0.88 0.01 90)"><code>DELETE /api/admin/players/:id</code></td><td style="padding:7px 9px;border:1px solid oklch(0.88 0.01 90)">Admin</td><td style="padding:7px 9px;border:1px solid oklch(0.88 0.01 90)">Spieler:in entfernen (nicht bei offenem Match)</td></tr>
+<tr><td style="padding:7px 9px;border:1px solid oklch(0.88 0.01 90)"><code>POST /api/admin/matches/:id/resolve</code></td><td style="padding:7px 9px;border:1px solid oklch(0.88 0.01 90)">Admin</td><td style="padding:7px 9px;border:1px solid oklch(0.88 0.01 90)">Gewinner erzwingen, ignoriert Bestätigungen</td></tr>
+<tr><td style="padding:7px 9px;border:1px solid oklch(0.88 0.01 90)"><code>POST /api/admin/matches/:id/cancel</code></td><td style="padding:7px 9px;border:1px solid oklch(0.88 0.01 90)">Admin</td><td style="padding:7px 9px;border:1px solid oklch(0.88 0.01 90)">Match jederzeit abbrechen</td></tr>
+</tbody>
+</table>
+
+<h2 style="font-size:19px;font-weight:700;margin:28px 0 10px;border-bottom:1px solid oklch(0.88 0.01 90);padding-bottom:8px">7. Serverseitige Regellogik</h2>
+<p style="font-size:14.5px;line-height:1.65;color:oklch(0.3 0.02 90)">Die Herausforderungsregeln (links in der gleichen Reihe, eine Reihe höher rechts der eigenen Position) sowie die Gewinn-Rotation (Herausforderer übernimmt die Position, dazwischenliegende Spieler:innen rutschen je eine Position tiefer) müssen serverseitig validiert bzw. angewendet werden — das Frontend darf sie nur spiegeln, damit kein Client durch manipulierte Requests ungültige Matches erzeugt oder Ränge verändert. Sperrzustand ("bereits in einem offenen Match") wird bei jedem <code>POST /api/matches</code> gegen <code>matches.json</code> geprüft.</p>
+
+<h2 style="font-size:19px;font-weight:700;margin:28px 0 10px;border-bottom:1px solid oklch(0.88 0.01 90);padding-bottom:8px">8. Docker-Aufbau</h2>
+<pre style="background:oklch(0.97 0.004 90);border:1px solid oklch(0.88 0.01 90);border-radius:8px;padding:14px 16px;font-size:12.5px;line-height:1.6;overflow-x:auto;break-inside:avoid"># Dockerfile (Ausschnitt)
+FROM python:3.12-slim
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+COPY . .
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8080"]
+
+# docker-compose.yml
+services:
+  rangliste:
+    build: .
+    ports: ["8080:8080"]
+    volumes:
+      - ./config/admins.json:/config/admins.json:ro
+      - rangliste-data:/data
+    restart: unless-stopped
+
+volumes:
+  rangliste-data:</pre>
+<p style="font-size:13px;color:oklch(0.5 0.02 90)">Ein einzelner Container (FastAPI + Uvicorn) bedient Backend-API und die ausgelieferten Frontend-Dateien. Kein zweiter Datenbank-Service nötig.</p>
+
+<h2 style="font-size:19px;font-weight:700;margin:28px 0 10px;border-bottom:1px solid oklch(0.88 0.01 90);padding-bottom:8px">9. Backup</h2>
+<p style="font-size:14.5px;line-height:1.65;color:oklch(0.3 0.02 90)">Da alle Daten als Dateien im Volume liegen, genügt ein regelmäßiges Kopieren von <code>/data/*.json</code> (z. B. täglicher Cron-Job auf dem Host, der das Volume-Verzeichnis in ein Backup-Ziel sichert). Vor jedem Schreibvorgang sorgt der Atomic-Write-Mechanismus dafür, dass ein Backup nie eine halb geschriebene Datei erwischt.</p>
+
+<h2 style="font-size:19px;font-weight:700;margin:28px 0 10px;border-bottom:1px solid oklch(0.88 0.01 90);padding-bottom:8px">10. Bekannte Grenzen</h2>
+<ul style="font-size:14.5px;line-height:1.7;color:oklch(0.3 0.02 90)">
+<li>Skaliert nicht horizontal (mehrere Container-Instanzen/Worker) — bewusst akzeptiert für Single-Node-Betrieb; Uvicorn läuft mit genau einem Worker, damit der <code>asyncio.Lock</code> pro Datei wirksam bleibt.</li>
+<li>Keine SQL-Abfragen/Reports über historische Matches ohne die gesamte Datei zu laden — bei einem Verein (zweistellige Mitgliederzahl) unkritisch.</li>
+<li>Wachstum von <code>matches.json</code>: abgeschlossene Matches können nach z. B. 2 Jahren in eine separate <code>matches-archiv.json</code> ausgelagert werden, falls die Datei unhandlich wird.</li>
+</ul>
+
+</x-import>
+
+</x-dc>
+</body>
+</html>
