@@ -1,6 +1,6 @@
 # TC Waldpark — Rangliste Backend
 
-FastAPI-Backend passend zum Backend-Konzept (`Backend-Konzept Rangliste.dc.html`):
+FastAPI-Backend (Passwort-Hashing über `bcrypt` direkt, kein passlib) passend zum Backend-Konzept (`Backend-Konzept Rangliste.dc.html`):
 Single-Node, kein DB-Server, alle Daten in JSON-Dateien.
 
 ## Lokal starten (ohne Docker)

@@ -92,7 +92,7 @@ a:hover{color:oklch(0.4 0.13 155)}
 <ul style="font-size:14.5px;line-height:1.7;color:oklch(0.3 0.02 90)">
 <li><strong>FastAPI</strong> (Python 3.12) als Web-Framework — asynchron, mit Pydantic-Modellen für Player, Match, Admin-Konto und automatischer Request-Validierung.</li>
 <li><strong>Uvicorn</strong> als ASGI-Server im Container.</li>
-<li><strong>passlib[bcrypt]</strong> für Passwort-Hashing, <strong>PyJWT</strong> für signierte Session-Cookies.</li>
+<li><strong>bcrypt</strong> (direkt, ohne passlib-Abstraktion) für Passwort-Hashing, <strong>PyJWT</strong> für signierte Session-Cookies.</li>
 <li>Eigene kleine <code>JsonStore</code>-Klasse pro Datei (siehe Abschnitt 4) — keine ORM/DB-Bibliothek nötig.</li>
 <li>Das bestehende React-Frontend wird als statischer Vite-Build von FastAPI mitausgeliefert (<code>StaticFiles</code>-Mount) — ein Container, ein Deploy.</li>
 </ul>
@@ -107,7 +107,7 @@ a:hover{color:oklch(0.4 0.13 155)}
 
 <h2 style="font-size:19px;font-weight:700;margin:28px 0 10px;border-bottom:1px solid oklch(0.88 0.01 90);padding-bottom:8px">5. Authentifizierung</h2>
 <ul style="font-size:14.5px;line-height:1.7;color:oklch(0.3 0.02 90)">
-<li>Passwörter nie im Klartext speichern — <strong>bcrypt-Hash über passlib</strong> in beiden JSON-Dateien.</li>
+<li>Passwörter nie im Klartext speichern — <strong>bcrypt-Hash</strong> (direkt über die <code>bcrypt</code>-Bibliothek) in beiden JSON-Dateien.</li>
 <li>Login erzeugt ein <strong>signiertes Session-Cookie</strong> (JWT via PyJWT, httpOnly + Secure) mit Rolle (<code>admin</code>/<code>player</code>) und bei Spieler:innen der <code>playerId</code>.</li>
 <li>Server-seitige Middleware prüft bei jedem Request die Rolle: Admin-Endpunkte erfordern <code>role=admin</code>, Herausforderungs-/Bestätigungs-Endpunkte erfordern <code>role=player</code> <em>und</em> <code>mustChangePassword=false</code>.</li>
 <li>Neu angelegte Spieler:innen starten mit <code>mustChangePassword: true</code>; der Passwortänderungs-Endpunkt ist der einzige, den ein Spieler mit gesetztem Flag aufrufen darf, bevor er/sie sonst etwas tun kann.</li>
