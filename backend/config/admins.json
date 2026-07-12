@@ -1,6 +1,6 @@
 [
   {
     "username": "vorstand",
-    "passwordHash": "REPLACE_ME_RUN_scripts/hash_password.py"
+    "passwordHash": "$2b$12$ipy/VW5AIalnY3ag8KFRFu/GUE2xVbVaOc/vUYimUWHkka0wuuMcu"
   }
 ]
