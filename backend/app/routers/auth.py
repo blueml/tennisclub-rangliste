@@ -25,7 +25,7 @@ async def player_login(body: PlayerLoginRequest, response: Response):
 
     token = create_session_token(subject=player["id"], role="player")
     response.set_cookie(
-        COOKIE_NAME, token, httponly=True, samesite="lax", secure=True, max_age=COOKIE_MAX_AGE
+        COOKIE_NAME, token, httponly=True, samesite="lax", secure=False, max_age=COOKIE_MAX_AGE
     )
     return {"id": player["id"], "name": player["name"], "mustChangePassword": player["mustChangePassword"]}
 
@@ -39,7 +39,7 @@ async def admin_login(body: AdminLoginRequest, response: Response):
 
     token = create_session_token(subject=admin["username"], role="admin")
     response.set_cookie(
-        COOKIE_NAME, token, httponly=True, samesite="lax", secure=True, max_age=COOKIE_MAX_AGE
+        COOKIE_NAME, token, httponly=True, samesite="lax", secure=False, max_age=COOKIE_MAX_AGE
     )
     return {"username": admin["username"]}
 
