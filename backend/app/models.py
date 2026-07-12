@@ -21,6 +21,14 @@ class CreatePlayerRequest(BaseModel):
     initialPassword: str
 
 
+class UpdatePlayerEmailRequest(BaseModel):
+    email: EmailStr
+
+
+class ResetPlayerPasswordRequest(BaseModel):
+    newPassword: str
+
+
 class CreateMatchRequest(BaseModel):
     defenderId: str
 

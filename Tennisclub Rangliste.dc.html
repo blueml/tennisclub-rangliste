@@ -139,17 +139,54 @@ a:hover{color:oklch(0.4 0.13 155)}
         <div style="font-size:13px;font-weight:700;color:oklch(0.22 0.02 90);margin-bottom:10px">Spielerverwaltung · {{ dCount }} Mitglieder</div>
         <div style="display:flex;flex-direction:column;gap:6px;max-height:200px;overflow-y:auto;margin-bottom:14px">
           <sc-for list="{{ dAdminPlayers }}" as="p" hint-placeholder-count="5">
-            <div style="display:flex;align-items:center;gap:10px;padding:6px 10px;background:white;border:1px solid oklch(0.92 0.01 90);border-radius:8px;font-size:12.5px">
-              <span style="font-variant-numeric:tabular-nums;color:oklch(0.48 0.02 90);width:24px;font-weight:700">#{{ p.rank }}</span>
-              <span style="flex:1;min-width:0">
-                <div style="color:oklch(0.22 0.02 90);font-weight:600">{{ p.name }}</div>
-                <div style="color:oklch(0.55 0.02 90);font-size:11px">{{ p.email }}</div>
-              </span>
-              <sc-if value="{{ p.mustChange }}" hint-placeholder-val="{{ false }}">
-                <span style="font-size:10.5px;font-weight:700;color:oklch(0.6 0.13 70);white-space:nowrap">muss Kennwort ändern</span>
+            <div style="display:flex;flex-direction:column;gap:6px;padding:6px 10px;background:white;border:1px solid oklch(0.92 0.01 90);border-radius:8px;font-size:12.5px">
+              <div style="display:flex;align-items:center;gap:10px">
+                <span style="font-variant-numeric:tabular-nums;color:oklch(0.48 0.02 90);width:24px;font-weight:700">#{{ p.rank }}</span>
+                <span style="flex:1;min-width:0">
+                  <div style="color:oklch(0.22 0.02 90);font-weight:600">{{ p.name }}</div>
+                  <sc-if value="{{ p.isIdle }}" hint-placeholder-val="{{ true }}">
+                    <div style="color:oklch(0.55 0.02 90);font-size:11px">{{ p.email }}</div>
+                  </sc-if>
+                </span>
+                <sc-if value="{{ p.mustChange }}" hint-placeholder-val="{{ false }}">
+                  <span style="font-size:10.5px;font-weight:700;color:oklch(0.6 0.13 70);white-space:nowrap">muss Kennwort ändern</span>
+                </sc-if>
+                <sc-if value="{{ p.unlocked }}" hint-placeholder-val="{{ true }}">
+                  <button onClick="{{ p.onRemove }}" style="background:none;border:none;color:oklch(0.55 0.16 25);cursor:pointer;font-size:12px;font-weight:700;font-family:inherit">Entfernen</button>
+                </sc-if>
+              </div>
+
+              <sc-if value="{{ p.isIdle }}" hint-placeholder-val="{{ true }}">
+                <div style="display:flex;gap:12px;padding-left:34px">
+                  <button onClick="{{ p.onStartEditEmail }}" style="background:none;border:none;color:oklch(0.5 0.13 155);cursor:pointer;font-size:11.5px;font-weight:700;font-family:inherit;padding:0">E-Mail bearbeiten</button>
+                  <button onClick="{{ p.onStartResetPassword }}" style="background:none;border:none;color:oklch(0.5 0.13 155);cursor:pointer;font-size:11.5px;font-weight:700;font-family:inherit;padding:0">Kennwort zurücksetzen</button>
+                </div>
               </sc-if>
-              <sc-if value="{{ p.unlocked }}" hint-placeholder-val="{{ true }}">
-                <button onClick="{{ p.onRemove }}" style="background:none;border:none;color:oklch(0.55 0.16 25);cursor:pointer;font-size:12px;font-weight:700;font-family:inherit">Entfernen</button>
+
+              <sc-if value="{{ p.isEditingEmail }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;gap:8px;padding-left:34px">
+                  <input type="email" value="{{ dEditEmailValue }}" onChange="{{ dOnEditEmailValueChange }}" style="flex:1;padding:7px 10px;border:1px solid oklch(0.88 0.01 90);border-radius:7px;font-size:12px;font-family:inherit"/>
+                  <button onClick="{{ dOnSaveEditEmail }}" style="padding:7px 12px;background:oklch(0.55 0.13 155);color:white;border:none;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">Speichern</button>
+                  <button onClick="{{ dOnCancelEditEmail }}" style="padding:7px 12px;background:none;border:1.5px solid oklch(0.88 0.01 90);border-radius:7px;font-size:12px;font-weight:700;color:oklch(0.35 0.02 90);cursor:pointer;font-family:inherit">Abbrechen</button>
+                </div>
+              </sc-if>
+
+              <sc-if value="{{ p.isResettingPw }}" hint-placeholder-val="{{ false }}">
+                <div style="display:flex;gap:8px;padding-left:34px">
+                  <input placeholder="Neues Kennwort" value="{{ dResetPwValue }}" onChange="{{ dOnResetPwValueChange }}" style="flex:1;padding:7px 10px;border:1px solid oklch(0.88 0.01 90);border-radius:7px;font-size:12px;font-family:inherit"/>
+                  <button onClick="{{ dOnGenerateResetPassword }}" style="padding:7px 12px;background:none;border:1.5px solid oklch(0.88 0.01 90);border-radius:7px;font-size:12px;font-weight:700;color:oklch(0.35 0.02 90);cursor:pointer;font-family:inherit">Generieren</button>
+                  <button onClick="{{ dOnSaveResetPassword }}" style="padding:7px 12px;background:oklch(0.55 0.13 155);color:white;border:none;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit">Zurücksetzen</button>
+                  <button onClick="{{ dOnCancelResetPassword }}" style="padding:7px 12px;background:none;border:1.5px solid oklch(0.88 0.01 90);border-radius:7px;font-size:12px;font-weight:700;color:oklch(0.35 0.02 90);cursor:pointer;font-family:inherit">Abbrechen</button>
+                </div>
+              </sc-if>
+
+              <sc-if value="{{ dHasRowError }}" hint-placeholder-val="{{ false }}">
+                <sc-if value="{{ p.isEditingEmail }}" hint-placeholder-val="{{ false }}">
+                  <div style="padding-left:34px;font-size:11px;color:oklch(0.55 0.16 25);font-weight:600">{{ dRowError }}</div>
+                </sc-if>
+                <sc-if value="{{ p.isResettingPw }}" hint-placeholder-val="{{ false }}">
+                  <div style="padding-left:34px;font-size:11px;color:oklch(0.55 0.16 25);font-weight:600">{{ dRowError }}</div>
+                </sc-if>
               </sc-if>
             </div>
           </sc-for>
@@ -673,6 +710,7 @@ class Component extends DCLogic {
       pwNew: '', pwConfirm: '', pwError: null,
       players: this.seedPlayersD(), selectedIndex: null, openMatches: [], colorCounter: 0, activeModal: null,
       newPlayerName: '', newPlayerEmail: '', newPlayerPassword: '', toast: null,
+      editEmailIdx: null, editEmailValue: '', resetPwIdx: null, resetPwValue: '', rowError: null,
     },
   };
 
@@ -1148,6 +1186,56 @@ class Component extends DCLogic {
     this.setState(s => ({ d: { ...s.d, players: this.seedPlayersD(), openMatches: [], colorCounter: 0, selectedIndex: null, activeModal: null, toast: null } }));
   }
 
+  startEditEmailD(idx) {
+    this.setState(s => ({ d: { ...s.d, editEmailIdx: idx, editEmailValue: s.d.players[idx].email, resetPwIdx: null, rowError: null } }));
+  }
+
+  setEditEmailValue(v) { this.setState(s => ({ d: { ...s.d, editEmailValue: v } })); }
+  cancelEditEmailD() { this.setState(s => ({ d: { ...s.d, editEmailIdx: null, rowError: null } })); }
+
+  saveEditEmailD() {
+    this.setState(s => {
+      const d = s.d;
+      const idx = d.editEmailIdx;
+      const email = d.editEmailValue.trim();
+      if (!email) return { d: { ...d, rowError: 'E-Mail darf nicht leer sein.' } };
+      if (d.players.some((p, i) => i !== idx && p.email.toLowerCase() === email.toLowerCase())) {
+        return { d: { ...d, rowError: 'E-Mail bereits vergeben.' } };
+      }
+      const players = d.players.slice();
+      players[idx] = { ...players[idx], email };
+      return { d: { ...d, players, editEmailIdx: null, rowError: null, toast: 'E-Mail wurde aktualisiert.' } };
+    });
+  }
+
+  startResetPasswordD(idx) {
+    this.setState(s => ({ d: { ...s.d, resetPwIdx: idx, resetPwValue: '', editEmailIdx: null, rowError: null } }));
+  }
+
+  setResetPwValue(v) { this.setState(s => ({ d: { ...s.d, resetPwValue: v } })); }
+  cancelResetPasswordD() { this.setState(s => ({ d: { ...s.d, resetPwIdx: null, rowError: null } })); }
+
+  generateResetPasswordD() {
+    const chars = 'ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789';
+    let out = '';
+    for (let i = 0; i < 8; i++) out += chars[Math.floor(Math.random() * chars.length)];
+    this.setState(s => ({ d: { ...s.d, resetPwValue: out } }));
+  }
+
+  saveResetPasswordD() {
+    this.setState(s => {
+      const d = s.d;
+      const idx = d.resetPwIdx;
+      if (d.resetPwValue.trim().length < 6) return { d: { ...d, rowError: 'Mindestens 6 Zeichen.' } };
+      const players = d.players.slice();
+      // Mirrors the backend: an admin reset always re-flags mustChangePassword,
+      // same as a freshly created account — the player must set their own
+      // password again on next login.
+      players[idx] = { ...players[idx], password: d.resetPwValue.trim(), mustChangePassword: true };
+      return { d: { ...d, players, resetPwIdx: null, rowError: null, toast: 'Kennwort wurde zurückgesetzt — Spieler:in muss es bei nächster Anmeldung ändern.' } };
+    });
+  }
+
   dismissToastD() { this.setState(s => ({ d: { ...s.d, toast: null } })); }
 
   selectPlayerD(idx) {
@@ -1382,6 +1470,10 @@ class Component extends DCLogic {
     const adminPlayers = d.players.map((p, idx) => ({
       idx, name: p.name, email: p.email, rank: idx + 1, locked: lockMap.has(idx), unlocked: !lockMap.has(idx),
       mustChange: p.mustChangePassword, onRemove: () => this.removePlayerD(idx),
+      isEditingEmail: d.editEmailIdx === idx, isResettingPw: d.resetPwIdx === idx,
+      isIdle: d.editEmailIdx !== idx && d.resetPwIdx !== idx,
+      onStartEditEmail: () => this.startEditEmailD(idx),
+      onStartResetPassword: () => this.startResetPasswordD(idx),
     }));
 
     return {
@@ -1391,6 +1483,12 @@ class Component extends DCLogic {
       rows, selected, modal,
       openMatches: openMatchesView, hasOpenMatches: openMatchesView.length > 0, noOpenMatches: openMatchesView.length === 0,
       adminPlayers, count: n,
+      editEmailValue: d.editEmailValue, onEditEmailValueChange: (e) => this.setEditEmailValue(e.target.value),
+      onSaveEditEmail: () => this.saveEditEmailD(), onCancelEditEmail: () => this.cancelEditEmailD(),
+      resetPwValue: d.resetPwValue, onResetPwValueChange: (e) => this.setResetPwValue(e.target.value),
+      onGenerateResetPassword: () => this.generateResetPasswordD(),
+      onSaveResetPassword: () => this.saveResetPasswordD(), onCancelResetPassword: () => this.cancelResetPasswordD(),
+      rowError: d.rowError, hasRowError: !!d.rowError,
       newPlayerName: d.newPlayerName, onNewPlayerNameChange: (e) => this.setNewPlayerName(e.target.value),
       newPlayerEmail: d.newPlayerEmail, onNewPlayerEmailChange: (e) => this.setNewPlayerEmail(e.target.value),
       newPlayerPassword: d.newPlayerPassword, onNewPlayerPasswordChange: (e) => this.setNewPlayerPassword(e.target.value),
@@ -1525,6 +1623,12 @@ class Component extends DCLogic {
       dRows: d.rows, dSelected: d.selected, dModal: d.modal,
       dOpenMatches: d.openMatches, dHasOpenMatches: d.hasOpenMatches, dNoOpenMatches: d.noOpenMatches,
       dAdminPlayers: d.adminPlayers, dCount: d.count,
+      dEditEmailValue: d.editEmailValue, dOnEditEmailValueChange: d.onEditEmailValueChange,
+      dOnSaveEditEmail: d.onSaveEditEmail, dOnCancelEditEmail: d.onCancelEditEmail,
+      dResetPwValue: d.resetPwValue, dOnResetPwValueChange: d.onResetPwValueChange,
+      dOnGenerateResetPassword: d.onGenerateResetPassword,
+      dOnSaveResetPassword: d.onSaveResetPassword, dOnCancelResetPassword: d.onCancelResetPassword,
+      dRowError: d.rowError, dHasRowError: d.hasRowError,
       dNewPlayerName: d.newPlayerName, dOnNewPlayerNameChange: d.onNewPlayerNameChange,
       dNewPlayerEmail: d.newPlayerEmail, dOnNewPlayerEmailChange: d.onNewPlayerEmailChange,
       dNewPlayerPassword: d.newPlayerPassword, dOnNewPlayerPasswordChange: d.onNewPlayerPasswordChange,

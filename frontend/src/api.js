@@ -40,6 +40,10 @@ export const api = {
 
   createPlayer: (name, email, initialPassword) =>
     request('/admin/players', { method: 'POST', body: JSON.stringify({ name, email, initialPassword }) }),
+  updatePlayerEmail: (playerId, email) =>
+    request(`/admin/players/${playerId}/email`, { method: 'PATCH', body: JSON.stringify({ email }) }),
+  resetPlayerPassword: (playerId, newPassword) =>
+    request(`/admin/players/${playerId}/reset-password`, { method: 'POST', body: JSON.stringify({ newPassword }) }),
   deletePlayer: (playerId) => request(`/admin/players/${playerId}`, { method: 'DELETE' }),
   adminResolveMatch: (matchId, winnerId) =>
     request(`/admin/matches/${matchId}/resolve`, { method: 'POST', body: JSON.stringify({ winnerId }) }),

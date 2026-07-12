@@ -3,9 +3,14 @@ from uuid import uuid4
 
 from fastapi import APIRouter, Depends, HTTPException
 
-from ..models import AdminResolveRequest, CreatePlayerRequest
+from ..models import (
+    AdminResolveRequest,
+    CreatePlayerRequest,
+    ResetPlayerPasswordRequest,
+    UpdatePlayerEmailRequest,
+)
 from ..ranking import apply_challenge_win
-from ..security import hash_password, require_admin
+from ..security import hash_password, require_admin  # noqa: F401 (hash_password also used below)
 from ..stores import matches_store, players_store
 
 router = APIRouter(prefix="/api/admin", tags=["admin"])
@@ -32,6 +37,41 @@ async def create_player(body: CreatePlayerRequest, session: dict = Depends(requi
 
     player = await players_store.mutate(_mutate)
     return {"id": player["id"], "name": player["name"], "email": player["email"]}
+
+
+@router.patch("/players/{player_id}/email")
+async def update_player_email(player_id: str, body: UpdatePlayerEmailRequest, session: dict = Depends(require_admin)):
+    def _mutate(data: dict):
+        if any(p["email"].lower() == body.email.lower() and p["id"] != player_id for p in data["players"]):
+            raise HTTPException(status_code=409, detail="E-Mail bereits vergeben.")
+        for p in data["players"]:
+            if p["id"] == player_id:
+                p["email"] = body.email
+                return data, p
+        raise HTTPException(status_code=404, detail="Spieler:in nicht gefunden.")
+
+    player = await players_store.mutate(_mutate)
+    return {"id": player["id"], "email": player["email"]}
+
+
+@router.post("/players/{player_id}/reset-password")
+async def reset_player_password(player_id: str, body: ResetPlayerPasswordRequest, session: dict = Depends(require_admin)):
+    if len(body.newPassword) < 6:
+        raise HTTPException(status_code=400, detail="Mindestens 6 Zeichen.")
+    new_hash = hash_password(body.newPassword)
+
+    def _mutate(data: dict):
+        for p in data["players"]:
+            if p["id"] == player_id:
+                p["passwordHash"] = new_hash
+                # Forces the player to pick their own new password on next
+                # login, same as a freshly created account.
+                p["mustChangePassword"] = True
+                return data, p
+        raise HTTPException(status_code=404, detail="Spieler:in nicht gefunden.")
+
+    await players_store.mutate(_mutate)
+    return {"ok": True}
 
 
 @router.delete("/players/{player_id}")

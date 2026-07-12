@@ -134,6 +134,18 @@ export default function RankingPage() {
     }
   }
 
+  async function updateEmail(playerId, email) {
+    await api.updatePlayerEmail(playerId, email);
+    setToast('E-Mail wurde aktualisiert.');
+    await load();
+  }
+
+  async function resetPassword(playerId, newPassword) {
+    await api.resetPlayerPassword(playerId, newPassword);
+    setToast('Kennwort wurde zurückgesetzt — Spieler:in muss es bei nächster Anmeldung ändern.');
+    await load();
+  }
+
   return (
     <div style={{ maxWidth: 820, margin: '0 auto', background: 'white', minHeight: '100vh', boxShadow: '0 0 0 1px oklch(0.9 0.01 90)' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 28px', borderBottom: '1px solid oklch(0.9 0.01 90)' }}>
@@ -161,7 +173,14 @@ export default function RankingPage() {
       <OpenMatches matches={openMatches} byId={byId} onOpen={setActiveMatch} />
 
       {!isPlayer && (
-        <AdminPanel ranking={ranking} lockedIds={new Set(lockMap.keys())} onAddPlayer={addPlayer} onRemovePlayer={removePlayer} />
+        <AdminPanel
+          ranking={ranking}
+          lockedIds={new Set(lockMap.keys())}
+          onAddPlayer={addPlayer}
+          onRemovePlayer={removePlayer}
+          onUpdateEmail={updateEmail}
+          onResetPassword={resetPassword}
+        />
       )}
 
       <RankingTree
