@@ -5,7 +5,7 @@ export default function RankingTree({ ranking, lockColorFor, selectedId, targetI
   const rows = rowsFromRanking(ranking);
 
   return (
-    <div style={{ minWidth: 2000, padding: '28px 28px 40px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16, overflowX: 'auto' }}>
+    <div style={{ padding: '28px 28px 40px', display: 'flex', flexDirection: 'column', alignItems: 'flex-start', gap: 16, overflowX: 'auto' }}>
       {rows.map((row) => (
         <div key={row.r} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
           <div style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: '0.09em', textTransform: 'uppercase', color: 'oklch(0.62 0.02 90)' }}>
