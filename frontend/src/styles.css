@@ -1,0 +1,29 @@
+:root {
+  color-scheme: light;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  background: oklch(0.965 0.006 90);
+  font-family: 'Manrope', system-ui, sans-serif;
+  color: oklch(0.22 0.02 90);
+}
+
+a {
+  color: oklch(0.5 0.13 155);
+}
+a:hover {
+  color: oklch(0.4 0.13 155);
+}
+
+button {
+  font-family: inherit;
+}
+
+input {
+  font-family: inherit;
+}
