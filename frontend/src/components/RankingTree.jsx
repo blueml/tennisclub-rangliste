@@ -5,17 +5,17 @@ export default function RankingTree({ ranking, lockColorFor, selectedId, targetI
   const rows = rowsFromRanking(ranking);
 
   return (
-    <div style={{ padding: '28px 28px 40px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16 }}>
+    <div style={{ padding: '28px 28px 40px', display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16, overflowX: 'auto' }}>
       {rows.map((row) => (
         <div key={row.r} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>
           <div style={{ fontSize: 10.5, fontWeight: 700, letterSpacing: '0.09em', textTransform: 'uppercase', color: 'oklch(0.62 0.02 90)' }}>
             {row.label}
           </div>
-          <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', justifyContent: 'center' }}>
+          <div style={{ display: 'flex', gap: 10, flexWrap: 'nowrap', justifyContent: 'center' }}>
             {row.entries.map((entry) => {
               if (entry.isPlaceholder) {
                 return (
-                  <div key={entry.id} style={placeholderStyle}>
+                  <div key={entry.id} style={{ ...placeholderStyle, flexShrink: 0 }}>
                     <span style={{ fontSize: 13.5, fontWeight: 600, color: 'oklch(0.65 0.01 90)' }}>{entry.name}</span>
                   </div>
                 );
@@ -23,7 +23,7 @@ export default function RankingTree({ ranking, lockColorFor, selectedId, targetI
               const isSelected = selectedId === entry.id;
               const isTarget = targetIds?.has(entry.id);
               const lockColor = lockColorFor?.(entry.id);
-              const style = cardStyle(isSelected, isTarget, lockColor);
+              const style = { ...cardStyle(isSelected, isTarget, lockColor), flexShrink: 0 };
               return (
                 <button key={entry.id} onClick={() => onSelect(entry)} style={style}>
                   <span style={{ fontSize: 11, fontWeight: 800, fontVariantNumeric: 'tabular-nums', color: 'oklch(0.55 0.02 90)' }}>
