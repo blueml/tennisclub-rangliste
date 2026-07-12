@@ -1,0 +1,47 @@
+services:
+  backend:
+    build: ../backend
+    environment:
+      - JWT_SECRET=${JWT_SECRET:?set a real secret in a .env file}
+      - ADMINS_PATH=/config/admins.json
+      - PLAYERS_PATH=/data/players.json
+      - MATCHES_PATH=/data/matches.json
+      # nginx (not the browser directly) talks to this origin, so CORS can
+      # stay locked down / is effectively unused once both are same-origin
+      # behind nginx. Kept here in case you access the backend directly too.
+      - CORS_ORIGINS=https://rangliste.comunicar.de
+    volumes:
+      - ../backend/config/admins.json:/config/admins.json:ro
+      - ../backend/data:/data
+    restart: unless-stopped
+    # No `ports:` — only reachable from other containers on the compose
+    # network (i.e. nginx), not directly from the host/internet.
+
+  nginx:
+    image: nginx:alpine
+    depends_on:
+      - backend
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ../frontend/dist:/usr/share/nginx/html:ro
+      - certbot-www:/var/www/certbot:ro
+      - certbot-conf:/etc/letsencrypt:ro
+    restart: unless-stopped
+
+  # Renews the TLS certificate twice a day; a no-op unless it's within the
+  # renewal window. The very first certificate must be requested manually
+  # (see README.md) before nginx has anything to serve on port 443.
+  certbot:
+    image: certbot/certbot
+    volumes:
+      - certbot-www:/var/www/certbot
+      - certbot-conf:/etc/letsencrypt
+    entrypoint: >
+      /bin/sh -c "trap exit TERM; while :; do certbot renew --webroot -w /var/www/certbot; sleep 12h & wait $${!}; done"
+
+volumes:
+  certbot-www:
+  certbot-conf:
