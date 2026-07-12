@@ -8,6 +8,7 @@ services:
       - ADMINS_PATH=/config/admins.json
       - PLAYERS_PATH=/data/players.json
       - MATCHES_PATH=/data/matches.json
+    user: 1000:1000
     volumes:
       - ./config/admins.json:/config/admins.json:ro
       - ./data:/data
