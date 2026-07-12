@@ -7,7 +7,7 @@ Single-Node-Konzept — kein zusätzlicher Cloud-Loadbalancer nötig.
 ## Voraussetzungen
 
 - Ein Linux-Host mit Docker + Docker Compose.
-- Eine Domain, die auf die öffentliche IP des Hosts zeigt (z. B. `test.comunicar.de`).
+- Eine Domain, die auf die öffentliche IP des Hosts zeigt (z. B. `www.comunicar.de`).
 - Ports 80 und 443 am Host/Router freigegeben.
 
 ## 1. Frontend bauen
@@ -20,7 +20,7 @@ npm run build   # erzeugt frontend/dist
 
 ## 2. Domain in der Config eintragen
 
-In `deploy/nginx/nginx.conf` alle Vorkommen von `test.comunicar.de` durch
+In `deploy/nginx/nginx.conf` alle Vorkommen von `www.comunicar.de` durch
 die echte Domain ersetzen. Ebenso `CORS_ORIGINS` in `deploy/docker-compose.yml`.
 
 ## 3. Erstes TLS-Zertifikat holen
@@ -36,7 +36,7 @@ docker run --rm \
   -v deploy_certbot-www:/var/www/certbot \
   -v deploy_certbot-conf:/etc/letsencrypt \
   certbot/certbot certonly --webroot -w /var/www/certbot \
-  -d test.comunicar.de --agree-tos -m blueml@blueml-it.de --no-eff-email
+  -d www.comunicar.de --agree-tos -m blueml@blueml-it.de --no-eff-email
 docker compose restart nginx
 ```
 
@@ -49,7 +49,7 @@ echo "JWT_SECRET=ein-langer-zufaelliger-string" > .env
 docker compose up -d --build
 ```
 
-Die Anwendung ist danach unter `https://test.comunicar.de` erreichbar.
+Die Anwendung ist danach unter `https://www.comunicar.de` erreichbar.
 `certbot` läuft dauerhaft mit und erneuert das Zertifikat automatisch, bevor
 es abläuft.
 
