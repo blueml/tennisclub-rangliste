@@ -13,6 +13,13 @@ export default function RankingTree({ ranking, lockColorFor, selectedId, targetI
           </div>
           <div style={{ display: 'flex', gap: 10, flexWrap: 'wrap', justifyContent: 'center' }}>
             {row.entries.map((entry) => {
+              if (entry.isPlaceholder) {
+                return (
+                  <div key={entry.id} style={placeholderStyle}>
+                    <span style={{ fontSize: 13.5, fontWeight: 600, color: 'oklch(0.65 0.01 90)' }}>{entry.name}</span>
+                  </div>
+                );
+              }
               const isSelected = selectedId === entry.id;
               const isTarget = targetIds?.has(entry.id);
               const lockColor = lockColorFor?.(entry.id);
@@ -56,3 +63,15 @@ function cardStyle(isSelected, isTarget, lockColor) {
   }
   return { ...base, background: 'white', border: '1.5px solid oklch(0.9 0.01 90)' };
 }
+
+const placeholderStyle = {
+  padding: '10px 16px',
+  borderRadius: 14,
+  display: 'flex',
+  flexDirection: 'column',
+  alignItems: 'center',
+  gap: 2,
+  minWidth: 112,
+  background: 'oklch(0.98 0.004 90)',
+  border: '1.5px dashed oklch(0.9 0.01 90)',
+};

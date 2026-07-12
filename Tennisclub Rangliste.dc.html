@@ -701,6 +701,34 @@ class Component extends DCLogic {
     return arr;
   }
 
+  placeholderCardStyle() {
+    return "padding:10px 16px;border-radius:14px;cursor:default;display:flex;flex-direction:column;align-items:center;gap:2px;min-width:112px;background:oklch(0.98 0.004 90);border:1.5px dashed oklch(0.9 0.01 90);";
+  }
+
+  placeholderChipStyle() {
+    return "padding:7px 12px;border-radius:20px;cursor:default;display:flex;align-items:center;gap:6px;background:oklch(0.97 0.004 90);border:1.5px dashed oklch(0.9 0.01 90);";
+  }
+
+  // The pyramid is built row-by-row from a flat, ordered ranking list, so only
+  // the LAST row can ever be short of its full width (r+1 slots) — every row
+  // above it is always full because the next row starts exactly where it
+  // ends. Pad that final row with empty dashed slots so the triangle shape
+  // reads as complete even while the club still has open spots to fill.
+  padLastRow(rows) {
+    if (rows.length === 0) return rows;
+    const last = rows[rows.length - 1];
+    const expected = last.r + 1;
+    const missing = expected - last.players.length;
+    for (let k = 0; k < missing; k++) {
+      last.players.push({
+        idx: null, name: 'frei', rank: '', isPlaceholder: true,
+        cardStyle: this.placeholderCardStyle(), chipStyle: this.placeholderChipStyle(),
+        onClick: () => {},
+      });
+    }
+    return rows;
+  }
+
   coordsForIndex(i) {
     let r = Math.floor((Math.sqrt(8 * i + 1) - 1) / 2);
     while (this.triangular(r + 1) <= i) r++;
@@ -974,6 +1002,7 @@ class Component extends DCLogic {
       }
       rows.push({ r, label: 'Runde ' + (r + 1), players });
     }
+    this.padLastRow(rows);
 
     let selected = null;
     if (s.selectedIndex != null && !lockMap.has(s.selectedIndex)) {
@@ -1291,6 +1320,7 @@ class Component extends DCLogic {
       }
       rows.push({ r, label: 'Runde ' + (r + 1), players });
     }
+    this.padLastRow(rows);
 
     let selected = null;
     if (isPlayer && d.selectedIndex === self && !lockMap.has(self)) {
@@ -1399,6 +1429,7 @@ class Component extends DCLogic {
       }
       rows.push({ r, label: 'Runde ' + (r + 1), players });
     }
+    this.padLastRow(rows);
 
     let selected = null;
     if (s.selectedIndex != null) {

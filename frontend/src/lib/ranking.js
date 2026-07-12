@@ -38,5 +38,22 @@ export function rowsFromRanking(ranking) {
     const end = Math.min(triangular(r + 1), n);
     rows.push({ r, label: `Runde ${r + 1}`, entries: ranking.slice(start, end).map((entry, k) => ({ ...entry, idx: start + k })) });
   }
+  padLastRow(rows);
+  return rows;
+}
+
+// The pyramid is built row-by-row from a flat, ordered ranking list, so only
+// the LAST row can ever be short of its full width (r+1 slots) — every row
+// above it is always full because the next row starts exactly where it ends.
+// Pad that final row with placeholder entries so the triangle shape reads as
+// complete even while the club still has open spots to fill.
+function padLastRow(rows) {
+  if (rows.length === 0) return rows;
+  const last = rows[rows.length - 1];
+  const expected = last.r + 1;
+  const missing = expected - last.entries.length;
+  for (let k = 0; k < missing; k++) {
+    last.entries.push({ id: `__placeholder_${last.r}_${k}`, name: 'frei', rank: null, isPlaceholder: true, idx: null });
+  }
   return rows;
 }
