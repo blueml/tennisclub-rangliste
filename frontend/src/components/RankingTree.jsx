@@ -4,8 +4,21 @@ import { rowsFromRanking } from '../lib/ranking.js';
 export default function RankingTree({ ranking, lockColorFor, selectedId, targetIds, onSelect }) {
   const rows = rowsFromRanking(ranking);
 
+  // In a real page (unlike the click-through prototype's pannable canvas)
+  // there's no ancestor stealing wheel events, but horizontal-only scroll
+  // areas aren't discoverable via a plain vertical mouse wheel by default in
+  // most browsers — redirect vertical wheel delta into horizontal scroll
+  // whenever the tree actually overflows.
+  function handleWheel(e) {
+    const el = e.currentTarget;
+    if (el.scrollWidth > el.clientWidth) {
+      el.scrollLeft += e.deltaY;
+      e.preventDefault();
+    }
+  }
+
   return (
-    <div style={{ padding: '28px 28px 40px', overflowX: 'auto' }}>
+    <div className="ranking-tree-scroll" onWheel={handleWheel} style={{ padding: '28px 28px 40px', overflowX: 'auto' }}>
       <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 16, width: 'max-content', margin: '0 auto' }}>
         {rows.map((row) => (
           <div key={row.r} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8 }}>

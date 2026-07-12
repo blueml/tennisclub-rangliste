@@ -20,6 +20,24 @@ a:hover {
   color: oklch(0.4 0.13 155);
 }
 
+.ranking-tree-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: oklch(0.75 0.02 90) transparent;
+}
+.ranking-tree-scroll::-webkit-scrollbar {
+  height: 9px;
+}
+.ranking-tree-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.ranking-tree-scroll::-webkit-scrollbar-thumb {
+  background: oklch(0.75 0.02 90);
+  border-radius: 5px;
+}
+.ranking-tree-scroll::-webkit-scrollbar-thumb:hover {
+  background: oklch(0.62 0.02 90);
+}
+
 button {
   font-family: inherit;
 }
