@@ -9,7 +9,7 @@ services:
       # nginx (not the browser directly) talks to this origin, so CORS can
       # stay locked down / is effectively unused once both are same-origin
       # behind nginx. Kept here in case you access the backend directly too.
-      - CORS_ORIGINS=https://rangliste.comunicar.de
+      - CORS_ORIGINS=https://test.comunicar.de
     volumes:
       - ../backend/config/admins.json:/config/admins.json:ro
       - ../backend/data:/data
