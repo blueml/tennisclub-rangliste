@@ -10,8 +10,5 @@ services:
       - MATCHES_PATH=/data/matches.json
     volumes:
       - ./config/admins.json:/config/admins.json:ro
-      - rangliste-data:/data
+      - ./data:/data
     restart: unless-stopped
-
-volumes:
-  rangliste-data:
