@@ -150,7 +150,7 @@ export default function RankingPage() {
     <div style={{ maxWidth: 820, margin: '0 auto', background: 'white', minHeight: '100vh', boxShadow: '0 0 0 1px oklch(0.9 0.01 90)' }}>
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '20px 28px', borderBottom: '1px solid oklch(0.9 0.01 90)' }}>
         <div>
-          <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'oklch(0.55 0.13 155)' }}>TC Waldpark e.V.</div>
+          <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'oklch(0.55 0.13 155)' }}>TC Rösrath e.V.</div>
           <div style={{ fontSize: 20, fontWeight: 800 }}>Rangliste</div>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>

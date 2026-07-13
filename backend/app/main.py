@@ -10,7 +10,7 @@ from .routers import admin, auth, matches, ranking
 logger = logging.getLogger("rangliste.http")
 logging.basicConfig(level=logging.INFO, format="%(message)s")
 
-app = FastAPI(title="TC Waldpark — Rangliste API")
+app = FastAPI(title="TC Rösrath — Rangliste API")
 
 app.add_middleware(
     CORSMiddleware,

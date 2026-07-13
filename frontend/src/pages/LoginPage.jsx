@@ -50,7 +50,7 @@ export default function LoginPage() {
     >
       <div style={{ textAlign: 'center' }}>
         <div style={{ fontSize: 11, fontWeight: 700, letterSpacing: '0.08em', textTransform: 'uppercase', color: 'oklch(0.55 0.13 155)' }}>
-          TC Waldpark e.V.
+          TC Rösrath e.V.
         </div>
         <div style={{ fontSize: 24, fontWeight: 800 }}>Anmelden</div>
       </div>
